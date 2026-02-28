@@ -5,6 +5,7 @@ import { PlayCircle, Crown, History as HistoryIcon, Calendar, X, ShoppingBag } f
 import { useEffect, useState } from 'react';
 import ChallengeMap from '../components/ChallengeMap';
 import { SHOP_ITEMS } from '../data/shopItems';
+import NotificationBanner from '../components/NotificationBanner';
 
 import eggImg from '../assets/pipi/egg.png';
 import crackedImg from '../assets/pipi/cracked.png';
@@ -67,6 +68,9 @@ export default function Dashboard() {
                     </motion.div>
                 ))}
             </AnimatePresence>
+
+            {/* 알림 권한 요청 배너 */}
+            <NotificationBanner />
 
             <div className="responsive-container py-6">
 
