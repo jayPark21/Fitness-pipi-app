@@ -35,7 +35,8 @@ function App() {
     <PayPalScriptProvider options={initialOptions}>
       <Router>
         <div className="w-full min-h-screen bg-slate-900 text-slate-100 flex justify-center">
-          <div className="w-full max-w-md bg-slate-800 shadow-xl overflow-y-auto relative h-screen sm:h-auto sm:min-h-screen sm:border-x sm:border-slate-700">
+          <div className="w-full max-w-full md:max-w-4xl lg:max-w-6xl bg-slate-800 shadow-xl overflow-y-auto relative h-screen md:h-auto md:min-h-[80vh] md:my-8 md:rounded-3xl md:border md:border-slate-700">
+
             <Routes>
               <Route path="/" element={<Onboarding />} />
               <Route path="/dashboard" element={<Dashboard />} />
