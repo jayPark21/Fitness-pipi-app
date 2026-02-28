@@ -20,9 +20,9 @@ export default function Shop() {
     const filteredItems = SHOP_ITEMS.filter(item => item.category === selectedCategory);
 
     const handleAction = (item: ShopItem) => {
-        const isOwned = penguin.ownedItems.includes(item.id);
+        const isOwned = (penguin.ownedItems ?? []).includes(item.id);
         if (isOwned) {
-            const isEquipped = penguin.equippedItems[item.category as keyof typeof penguin.equippedItems] === item.id;
+            const isEquipped = penguin.equippedItems?.[item.category as keyof typeof penguin.equippedItems] === item.id;
             if (isEquipped) {
                 equipItem(item.category, undefined);
             } else {
@@ -85,8 +85,8 @@ export default function Shop() {
                 {/* Items Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
                     {filteredItems.map((item, idx) => {
-                        const isOwned = penguin.ownedItems.includes(item.id);
-                        const isEquipped = penguin.equippedItems[item.category as keyof typeof penguin.equippedItems] === item.id;
+                        const isOwned = (penguin.ownedItems ?? []).includes(item.id);
+                        const isEquipped = penguin.equippedItems?.[item.category as keyof typeof penguin.equippedItems] === item.id;
                         const canAfford = penguin.xp >= item.price;
 
                         return (
