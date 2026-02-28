@@ -69,6 +69,8 @@ export default function Dashboard() {
             </AnimatePresence>
 
             <div className="responsive-container py-6">
+
+
                 <header className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-primary-500">
@@ -160,7 +162,7 @@ export default function Dashboard() {
                                         )}
 
                                         {/* Headband / Ninja Mask (Premium Only, for Baby/Adult stages) */}
-                                        {userState.hasPremium && penguin.friendshipLevel >= 3 && !penguin.equippedItems.hat && (
+                                        {userState.hasPremium && penguin.friendshipLevel >= 3 && !penguin.equippedItems?.hat && (
                                             <g>
                                                 <rect x="40" y="70" width="120" height="25" rx="4" fill="#1e1b4b" stroke="#312e81" strokeWidth="1" />
                                                 <motion.path
@@ -177,19 +179,19 @@ export default function Dashboard() {
                                         )}
 
                                         {/* Shop Equipped Items */}
-                                        {penguin.equippedItems.hat && (
+                                        {penguin.equippedItems?.hat && (
                                             <text x="100" y="70" fontSize="50" textAnchor="middle" className="drop-shadow-md">
-                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems.hat)?.icon}
+                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat)?.icon}
                                             </text>
                                         )}
-                                        {penguin.equippedItems.glasses && (
+                                        {penguin.equippedItems?.glasses && (
                                             <text x="100" y="100" fontSize="40" textAnchor="middle" className="drop-shadow-sm">
-                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems.glasses)?.icon}
+                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.glasses)?.icon}
                                             </text>
                                         )}
-                                        {penguin.equippedItems.accessory && (
+                                        {penguin.equippedItems?.accessory && (
                                             <text x="160" y="150" fontSize="30" textAnchor="middle" transform="rotate(10, 160, 150)">
-                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems.accessory)?.icon}
+                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.accessory)?.icon}
                                             </text>
                                         )}
                                     </motion.g>

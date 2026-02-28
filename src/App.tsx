@@ -11,6 +11,9 @@ import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useStore } from './store/useStore';
 
+// **추가할 한 줄**
+import ErrorBoundary from './components/ErrorBoundary';
+
 const initialOptions = {
   clientId: "test", // Fake credentials. In real app, put the client ID from PayPal MCP.
   currency: "USD",
@@ -41,7 +44,7 @@ function App() {
 
             <Routes>
               <Route path="/" element={<Onboarding />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
               <Route path="/workout" element={<Workout />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/history" element={<History />} />
