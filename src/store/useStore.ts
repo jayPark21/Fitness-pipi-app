@@ -102,15 +102,18 @@ export const useStore = create<AppStore>()(
                 };
             }),
             completeWorkout: () => set((prev) => {
-                const program = DAY_1_WORKOUT; // Should ideally be passed, but for now...
+                const program = DAY_1_WORKOUT;
                 let totalCalories = 0;
                 let totalDuration = 0;
+
+                // weight_kg가 없을 경우 기본값 70kg 적용
+                const weight = prev.userState.weight_kg ?? 70;
 
                 program.exercises.forEach((ex: any) => {
                     if (!ex.isRest && ex.met) {
                         // Formula: Calorie = (MET * 3.5 * weight / 200) * minutes
                         const minutes = ex.duration / 60;
-                        totalCalories += (ex.met * 3.5 * prev.userState.weight_kg / 200) * minutes;
+                        totalCalories += (ex.met * 3.5 * weight / 200) * minutes;
                     }
                     totalDuration += ex.duration;
                 });
@@ -132,9 +135,9 @@ export const useStore = create<AppStore>()(
                     nextXp = Math.floor(nextXp * 1.5);
                 }
 
-                // Achievement logic
-                const newBadges = [...prev.userState.badges];
-                const newStreak = prev.userState.streak + 1;
+                // Achievement logic — badges/history가 undefined여도 안전하게 처리
+                const newBadges = [...(prev.userState.badges ?? [])];
+                const newStreak = (prev.userState.streak ?? 0) + 1;
 
                 if (newStreak === 3 && !newBadges.includes('streak-3')) newBadges.push('streak-3');
                 if (newStreak === 7 && !newBadges.includes('streak-7')) newBadges.push('streak-7');
@@ -144,8 +147,8 @@ export const useStore = create<AppStore>()(
                     userState: {
                         ...prev.userState,
                         streak: newStreak,
-                        currentDay: prev.userState.currentDay + 1,
-                        history: [...prev.userState.history, newSession],
+                        currentDay: (prev.userState.currentDay ?? 1) + 1,
+                        history: [...(prev.userState.history ?? []), newSession],
                         badges: newBadges
                     },
                     penguin: {
@@ -157,6 +160,7 @@ export const useStore = create<AppStore>()(
                     }
                 };
             }),
+
             syncWithFirestore: async () => {
                 const { user, userState, penguin } = useStore.getState();
                 if (!user?.uid) return;
