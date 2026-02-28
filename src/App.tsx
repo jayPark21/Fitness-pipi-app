@@ -1,0 +1,52 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import Onboarding from './pages/Onboarding';
+import Dashboard from './pages/Dashboard';
+import Workout from './pages/Workout';
+import Subscription from './pages/Subscription';
+import { useEffect } from 'react';
+import { auth } from './firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useStore } from './store/useStore';
+
+const initialOptions = {
+  clientId: "test", // Fake credentials. In real app, put the client ID from PayPal MCP.
+  currency: "USD",
+  intent: "capture",
+};
+
+function App() {
+  const setUser = useStore((state) => state.setUser);
+
+  useEffect(() => {
+    // Initial migration/fix check
+    useStore.getState().renameToPipi();
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      if (user) {
+        await useStore.getState().fetchFromFirestore();
+      }
+    });
+    return () => unsubscribe();
+  }, [setUser]);
+
+  return (
+    <PayPalScriptProvider options={initialOptions}>
+      <Router>
+        <div className="w-full min-h-screen bg-slate-900 text-slate-100 flex justify-center">
+          <div className="w-full max-w-md bg-slate-800 shadow-xl overflow-y-auto relative h-screen sm:h-auto sm:min-h-screen sm:border-x sm:border-slate-700">
+            <Routes>
+              <Route path="/" element={<Onboarding />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/workout" element={<Workout />} />
+              <Route path="/subscription" element={<Subscription />} />
+            </Routes>
+          </div>
+        </div>
+      </Router>
+    </PayPalScriptProvider>
+  );
+}
+
+export default App;
