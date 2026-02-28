@@ -200,12 +200,12 @@ export const useStore = create<AppStore>()(
             }),
             buyItem: (itemId, price) => {
                 const state = useStore.getState();
-                if (state.penguin.xp >= price && !state.penguin.ownedItems.includes(itemId)) {
+                if (state.penguin.xp >= price && !(state.penguin.ownedItems ?? []).includes(itemId)) {
                     set((prev) => ({
                         penguin: {
                             ...prev.penguin,
                             xp: prev.penguin.xp - price,
-                            ownedItems: [...prev.penguin.ownedItems, itemId]
+                            ownedItems: [...(prev.penguin.ownedItems ?? []), itemId]
                         }
                     }));
                     state.syncWithFirestore();

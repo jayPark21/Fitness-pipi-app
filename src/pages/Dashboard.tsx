@@ -84,7 +84,7 @@ export default function Dashboard() {
                             className="p-2 bg-slate-800 rounded-xl border border-slate-700 text-slate-400 hover:text-white transition relative"
                         >
                             <ShoppingBag className="w-5 h-5" />
-                            {penguin.xp >= 200 && penguin.ownedItems.length === 0 && (
+                            {penguin.xp >= 200 && (penguin.ownedItems ?? []).length === 0 && (
                                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                             )}
                         </button>

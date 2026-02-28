@@ -146,7 +146,7 @@ export default function Shop() {
             <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-xl border border-white/10 px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-8">
                 <div className="flex flex-col items-center">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Assets</span>
-                    <span className="text-white font-black text-xl italic">{penguin.ownedItems.length} ITEMS</span>
+                    <span className="text-white font-black text-xl italic">{(penguin.ownedItems ?? []).length} ITEMS</span>
                 </div>
                 <div className="w-[1px] h-8 bg-white/10" />
                 <button
