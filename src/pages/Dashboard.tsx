@@ -51,6 +51,14 @@ export default function Dashboard() {
         }, 1000);
     };
 
+    // 배경 테마 맵핑
+    const BG_THEMES: Record<string, { gradient: string; emoji: string }> = {
+        'bg-gym': { gradient: 'from-slate-600/50 via-slate-800/60 to-zinc-900/80', emoji: '🏢' },
+        'bg-beach': { gradient: 'from-sky-500/30 via-cyan-400/10 to-amber-400/20', emoji: '🏖️' },
+    };
+    const equippedBg = penguin.equippedItems?.background;
+    const bgTheme = equippedBg ? BG_THEMES[equippedBg] : null;
+
     return (
         <div className="flex flex-col min-h-screen bg-slate-900 border-x border-slate-800">
             {/* Heart Particles */}
@@ -116,8 +124,21 @@ export default function Dashboard() {
                         </div>
 
                         {/* Penguin Pet Area */}
-                        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-800/20 rounded-3xl border border-slate-800/50 relative overflow-hidden min-h-[450px]">
+                        <div className={`flex-1 flex flex-col items-center justify-center p-8 rounded-3xl border relative overflow-hidden min-h-[450px] transition-all duration-700 ${bgTheme
+                                ? `bg-gradient-to-br ${bgTheme.gradient} border-teal-500/30`
+                                : 'bg-slate-800/20 border-slate-800/50'
+                            }`}>
                             <div className="absolute inset-0 bg-primary-500 blur-[120px] rounded-full opacity-5 animate-pulse"></div>
+
+                            {/* 장착된 배경 표시 (우측 하단 뱃지) */}
+                            {bgTheme && (
+                                <div className="absolute bottom-4 right-4 z-20 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-1.5">
+                                    <span className="text-lg">{bgTheme.emoji}</span>
+                                    <span className="text-[10px] font-black text-white/70 uppercase tracking-widest">
+                                        {SHOP_ITEMS.find(i => i.id === equippedBg)?.name}
+                                    </span>
+                                </div>
+                            )}
 
                             {/* Speech Bubble */}
                             <motion.div
@@ -182,19 +203,21 @@ export default function Dashboard() {
                                             </g>
                                         )}
 
-                                        {/* Shop Equipped Items */}
+                                        {/* 🧢 모자: 피피 머리 위 */}
                                         {penguin.equippedItems?.hat && (
-                                            <text x="100" y="70" fontSize="50" textAnchor="middle" className="drop-shadow-md">
+                                            <text x="100" y="55" fontSize="52" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat)?.icon}
                                             </text>
                                         )}
+                                        {/* 🕶️ 안경: 피피 눈 위치 */}
                                         {penguin.equippedItems?.glasses && (
-                                            <text x="100" y="100" fontSize="40" textAnchor="middle" className="drop-shadow-sm">
+                                            <text x="100" y="98" fontSize="36" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.glasses)?.icon}
                                             </text>
                                         )}
+                                        {/* 🎒 악세서리: 피피 우측 하단 */}
                                         {penguin.equippedItems?.accessory && (
-                                            <text x="160" y="150" fontSize="30" textAnchor="middle" transform="rotate(10, 160, 150)">
+                                            <text x="165" y="165" fontSize="34" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.accessory)?.icon}
                                             </text>
                                         )}
