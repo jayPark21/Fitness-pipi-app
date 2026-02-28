@@ -1,23 +1,73 @@
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../store/useStore';
-import { PlayCircle, Crown, History, Calendar, X } from 'lucide-react';
+import { PlayCircle, Crown, History as HistoryIcon, Calendar, X, ShoppingBag } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import ChallengeMap from '../components/ChallengeMap';
+import { SHOP_ITEMS } from '../data/shopItems';
+
+import eggImg from '../assets/pipi/egg.png';
+import crackedImg from '../assets/pipi/cracked.png';
+import babyImg from '../assets/pipi/baby.png';
+import adultImg from '../assets/pipi/adult.png';
 
 export default function Dashboard() {
     const navigate = useNavigate();
-    const { userState, penguin, feedPenguin } = useStore();
-    const [percent, setPercent] = useState(0);
+    const { userState, penguin, interactWithPipi } = useStore();
+    const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+    const [speechText, setSpeechText] = useState("");
 
     useEffect(() => {
-        // Animate percentage
+        const messages = {
+            happy: [
+                "Great work, Boss! Let's hit it! 🔥",
+                "I'm feeling strong today! 🐧",
+                "Your streak is looking spicy! Hot! 🌶️",
+                "Best partners ever! High five! ✋",
+                "Ready for our next mission? 🚀"
+            ],
+            sad: [
+                "I'm a bit low on energy... 🔋",
+                "A quick workout would cheer me up! 💧",
+                "Missing our routine, Boss... 😔",
+                "Let's get moving! I believe in you! ✨"
+            ],
+            hungry: ["Is it workout time? I'm starving for gains! 🍎"],
+            sleeping: ["Zzz... Dreaming of pushups... 💤"]
+        };
+
+        const currentMessages = messages[penguin.mood as keyof typeof messages] || messages.happy;
+        const randomMsg = currentMessages[Math.floor(Math.random() * currentMessages.length)];
+        setSpeechText(randomMsg);
+    }, [penguin.mood, userState.streak]);
+
+    const handlePet = (e: React.MouseEvent) => {
+        interactWithPipi();
+        const newHeart = { id: Date.now(), x: e.clientX, y: e.clientY };
+        setHearts(prev => [...prev, newHeart]);
         setTimeout(() => {
-            setPercent(Math.round((userState.currentDay / 21) * 100));
-        }, 500);
-    }, [userState]);
+            setHearts(prev => prev.filter(h => h.id !== newHeart.id));
+        }, 1000);
+    };
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-900 border-x border-slate-800">
+            {/* Heart Particles */}
+            <AnimatePresence>
+                {hearts.map(heart => (
+                    <motion.div
+                        key={heart.id}
+                        initial={{ opacity: 1, scale: 0.5, y: heart.y }}
+                        animate={{ opacity: 0, scale: 1.5, y: heart.y - 100, x: heart.x + (Math.random() * 40 - 20) }}
+                        exit={{ opacity: 0 }}
+                        className="fixed pointer-events-none z-[100] text-2xl"
+                        style={{ left: heart.x - 12, top: heart.y - 12 }}
+                    >
+                        ❤️
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+
             <div className="responsive-container py-6">
                 <header className="flex justify-between items-center mb-6">
                     <div>
@@ -26,98 +76,148 @@ export default function Dashboard() {
                         </h1>
                         <p className="text-slate-400 text-sm">21-Day Habit Challenge</p>
                     </div>
-                    <button
-                        onClick={() => navigate('/subscription')}
-                        className="p-2 bg-gradient-to-tr from-amber-500/20 to-yellow-400/20 rounded-xl border border-yellow-500/30 text-amber-300 hover:scale-105 transition"
-                    >
-                        <Crown className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => navigate('/shop')}
+                            className="p-2 bg-slate-800 rounded-xl border border-slate-700 text-slate-400 hover:text-white transition relative"
+                        >
+                            <ShoppingBag className="w-5 h-5" />
+                            {penguin.xp >= 200 && penguin.ownedItems.length === 0 && (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => navigate('/history')}
+                            className="p-2 bg-slate-800 rounded-xl border border-slate-700 text-slate-400 hover:text-white transition"
+                        >
+                            <HistoryIcon className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => navigate('/subscription')}
+                            className="p-2 bg-gradient-to-tr from-amber-500/20 to-yellow-400/20 rounded-xl border border-yellow-500/30 text-amber-300 hover:scale-105 transition"
+                        >
+                            <Crown className="w-5 h-5" />
+                        </button>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                     {/* Left Column: Progress & Penguin */}
                     <div className="md:col-span-7 flex flex-col">
                         {/* Progress */}
-                        <div className="bg-slate-800 rounded-2xl p-6 shadow-lg mb-8 border border-slate-700/50">
-                            <div className="flex justify-between mb-2">
-                                <span className="text-sm text-slate-400 font-medium">Streak: <span className="text-white font-bold">{userState.streak}🔥</span></span>
-                                <span className="text-sm text-teal-400 font-semibold">{percent}% Completed</span>
-                            </div>
-                            <div className="w-full bg-slate-700 rounded-full h-3">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${percent}%` }}
-                                    transition={{ duration: 1 }}
-                                    className="bg-gradient-to-r from-teal-400 to-primary-500 h-3 rounded-full shadow-[0_0_10px_rgba(45,212,191,0.3)]"
-                                />
-                            </div>
+                        <div className="mb-8">
+                            <ChallengeMap currentDay={userState.currentDay} />
                         </div>
 
                         {/* Penguin Pet Area */}
-                        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-800/20 rounded-3xl border border-slate-800/50 relative overflow-hidden min-h-[400px]">
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-800/20 rounded-3xl border border-slate-800/50 relative overflow-hidden min-h-[450px]">
                             <div className="absolute inset-0 bg-primary-500 blur-[120px] rounded-full opacity-5 animate-pulse"></div>
+
+                            {/* Speech Bubble */}
                             <motion.div
-                                onClick={feedPenguin}
+                                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                key={speechText}
+                                className="absolute top-10 z-20 bg-white text-slate-900 px-6 py-3 rounded-2xl rounded-bl-none font-bold text-sm shadow-xl border-2 border-slate-200"
+                            >
+                                {speechText}
+                                <div className="absolute -bottom-2 left-0 w-4 h-4 bg-white rotate-45 border-b-2 border-r-2 border-slate-200"></div>
+                            </motion.div>
+
+                            <motion.div
+                                onClick={handlePet}
                                 className="w-64 h-64 relative cursor-pointer group z-10"
                                 whileTap={{ scale: 0.9 }}
                             >
                                 <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
                                     <motion.g
                                         animate={{
-                                            y: penguin.mood === 'happy' ? [0, -20, 0] : [0, 5, 0],
-                                            scale: penguin.mood === 'happy' ? [1, 1.05, 1] : [1, 0.98, 1]
+                                            y: penguin.mood === 'happy' ? [0, -15, 0] : [0, 5, 0],
+                                            scale: penguin.mood === 'happy' ? [1, 1.02, 1] : [1, 0.98, 1]
                                         }}
                                         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                                     >
-                                        <ellipse cx="100" cy="120" rx="60" ry="70" fill={userState.hasPremium ? "#1e1b4b" : "#1e293b"} />
-                                        <ellipse cx="100" cy="130" rx="45" ry="55" fill="#f8fafc" />
-                                        {/* Ninja Suit / Body Details */}
-                                        {userState.hasPremium && (
-                                            <g>
-                                                <path d="M60 140 Q100 150 140 140" stroke="#ffd700" strokeWidth="2" fill="none" opacity="0.5" />
-                                                <circle cx="100" cy="125" r="3" fill="#ffd700" />
-                                            </g>
+                                        {/* Character Evolutionary Stage */}
+                                        <image
+                                            href={
+                                                penguin.friendshipLevel >= 10 ? adultImg :
+                                                    penguin.friendshipLevel >= 3 ? babyImg :
+                                                        penguin.friendshipLevel === 2 ? crackedImg :
+                                                            eggImg
+                                            }
+                                            x="0" y="0" width="200" height="200"
+                                            className="rounded-full"
+                                        />
+
+                                        {/* Mood Indicators (Zzz for sleeping) */}
+                                        {penguin.mood === 'sleeping' && (
+                                            <motion.g
+                                                animate={{ opacity: [0, 1, 0], y: [-5, -25], x: [10, 20] }}
+                                                transition={{ repeat: Infinity, duration: 2 }}
+                                            >
+                                                <text x="140" y="60" fontSize="24" fill="#64748b" fontWeight="black" fontStyle="italic">Zzz</text>
+                                            </motion.g>
                                         )}
-                                        {/* Eyes */}
-                                        {penguin.mood === 'happy' ? (
-                                            <>
-                                                <path d="M80 90 Q85 85 90 90" stroke={userState.hasPremium ? "#ffd700" : "#f8fafc"} fill="none" strokeWidth="4" />
-                                                <path d="M110 90 Q115 85 120 90" stroke={userState.hasPremium ? "#ffd700" : "#f8fafc"} fill="none" strokeWidth="4" />
-                                            </>
-                                        ) : (
-                                            <>
-                                                <circle cx="85" cy="90" r="5" fill={userState.hasPremium ? "#ffd700" : "#f8fafc"} />
-                                                <circle cx="115" cy="90" r="5" fill={userState.hasPremium ? "#ffd700" : "#f8fafc"} />
-                                            </>
-                                        )}
-                                        {/* Beak */}
-                                        <path d="M95 100 Q100 110 105 100 Q100 95 95 100" fill="#fbbf24" />
-                                        {/* Headband / Ninja Mask */}
-                                        {userState.hasPremium && (
+
+                                        {/* Headband / Ninja Mask (Premium Only, for Baby/Adult stages) */}
+                                        {userState.hasPremium && penguin.friendshipLevel >= 3 && !penguin.equippedItems.hat && (
                                             <g>
-                                                <rect x="40" y="75" width="120" height="30" rx="5" fill="#1e1b4b" stroke="#312e81" strokeWidth="1" />
+                                                <rect x="40" y="70" width="120" height="25" rx="4" fill="#1e1b4b" stroke="#312e81" strokeWidth="1" />
                                                 <motion.path
                                                     animate={{ rotate: [0, 15, 0], x: [0, 5, 0] }}
                                                     transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                                                    d="M160 85 L180 75 L175 95 Z" fill="#312e81"
+                                                    d="M160 80 L180 70 L175 90 Z" fill="#312e81"
                                                 />
                                                 <motion.path
                                                     animate={{ opacity: [0.5, 1, 0.5] }}
                                                     transition={{ repeat: Infinity, duration: 2 }}
-                                                    d="M45 85 Q100 90 155 85" stroke="#fbbf24" strokeWidth="4" fill="none"
+                                                    d="M45 80 Q100 85 155 80" stroke="#fbbf24" strokeWidth="4" fill="none"
                                                 />
                                             </g>
+                                        )}
+
+                                        {/* Shop Equipped Items */}
+                                        {penguin.equippedItems.hat && (
+                                            <text x="100" y="70" fontSize="50" textAnchor="middle" className="drop-shadow-md">
+                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems.hat)?.icon}
+                                            </text>
+                                        )}
+                                        {penguin.equippedItems.glasses && (
+                                            <text x="100" y="100" fontSize="40" textAnchor="middle" className="drop-shadow-sm">
+                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems.glasses)?.icon}
+                                            </text>
+                                        )}
+                                        {penguin.equippedItems.accessory && (
+                                            <text x="160" y="150" fontSize="30" textAnchor="middle" transform="rotate(10, 160, 150)">
+                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems.accessory)?.icon}
+                                            </text>
                                         )}
                                     </motion.g>
                                 </svg>
                             </motion.div>
 
-                            <div className="mt-8 text-center z-10">
+                            <div className="mt-8 text-center z-10 w-full max-w-xs">
                                 <h2 className="text-2xl font-bold font-sans flex items-center justify-center gap-3 text-white">
-                                    {penguin.name} <span className="bg-slate-700 px-3 py-1 rounded-full text-xs font-mono tracking-wider">LVL {penguin.friendshipLevel}</span>
+                                    {penguin.name} <span className="bg-teal-500 text-slate-900 px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase">LVL {penguin.friendshipLevel}</span>
                                 </h2>
-                                <p className="text-slate-400 text-base mt-2 max-w-xs mx-auto">
-                                    {penguin.mood === 'happy' ? 'Pipi is pumped up and ready to rumble with you!' : 'He looks a bit tired. Complete a workout to boost his energy!'}
+
+                                {/* XP Bar */}
+                                <div className="mt-4 px-8">
+                                    <div className="flex justify-between items-end mb-1">
+                                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">Bonding Level</span>
+                                        <span className="text-[10px] font-black text-teal-400">{penguin.xp} / {penguin.nextLevelXp} XP</span>
+                                    </div>
+                                    <div className="w-full bg-slate-700/50 rounded-full h-2 border border-slate-700 overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${(penguin.xp / penguin.nextLevelXp) * 100}%` }}
+                                            className="h-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.5)]"
+                                        />
+                                    </div>
+                                </div>
+
+                                <p className="text-slate-400 text-sm mt-4 font-medium italic">
+                                    {penguin.mood === 'happy' ? 'Pipi is pumped up and ready to rumble!' : 'He looks a bit tired. Let\'s move together!'}
                                 </p>
                             </div>
                         </div>
@@ -140,11 +240,19 @@ export default function Dashboard() {
 
                         {/* Recent Activity */}
                         <div className="bg-slate-800/30 rounded-3xl p-6 border border-slate-800/50 flex-1">
-                            <div className="flex items-center gap-2 mb-6">
-                                <div className="p-2 bg-slate-700/50 rounded-lg">
-                                    <History className="w-5 h-5 text-teal-400" />
+                            <div className="flex justify-between items-center mb-6">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 bg-slate-700/50 rounded-lg">
+                                        <HistoryIcon className="w-5 h-5 text-teal-400" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-white tracking-tight">Mission History</h3>
                                 </div>
-                                <h3 className="text-xl font-bold text-white tracking-tight">Mission History</h3>
+                                <button
+                                    onClick={() => navigate('/history')}
+                                    className="text-xs font-black text-teal-400 uppercase tracking-widest hover:underline"
+                                >
+                                    View All
+                                </button>
                             </div>
 
                             <div className="space-y-4">

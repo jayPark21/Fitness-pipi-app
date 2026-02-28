@@ -5,6 +5,7 @@ export interface WorkoutExercise {
     videoUrl: string;
     videoQuery?: string; // Pexels API 검색어
     isRest?: boolean;
+    met?: number; // Metabolic Equivalent of Task
 }
 
 
@@ -26,14 +27,15 @@ export const DAY_1_WORKOUT: WorkoutProgram = {
             name: "Crunches",
             duration: 30,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-            videoQuery: "crunches exercise"
+            videoQuery: "crunches exercise",
+            met: 4.0
         },
         {
             id: "rest-1",
             name: "Rest & Prepare",
             duration: 10,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-            videoQuery: "relaxing nature",
+            videoQuery: "calm forest nature forest",
             isRest: true
         },
         {
@@ -41,14 +43,15 @@ export const DAY_1_WORKOUT: WorkoutProgram = {
             name: "Bicycle Crunches",
             duration: 30,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-            videoQuery: "bicycle crunches"
+            videoQuery: "bicycle crunches",
+            met: 5.0
         },
         {
             id: "rest-2",
             name: "Rest & Prepare",
             duration: 10,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-            videoQuery: "relaxing nature",
+            videoQuery: "green forest background",
             isRest: true
         },
         {
@@ -56,14 +59,15 @@ export const DAY_1_WORKOUT: WorkoutProgram = {
             name: "Plank",
             duration: 30,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-            videoQuery: "plank exercise"
+            videoQuery: "plank exercise",
+            met: 3.5
         },
         {
             id: "rest-3",
             name: "Rest & Prepare",
             duration: 10,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
-            videoQuery: "relaxing nature",
+            videoQuery: "scenic forest nature",
             isRest: true
         },
         {
@@ -71,8 +75,8 @@ export const DAY_1_WORKOUT: WorkoutProgram = {
             name: "Mountain Climbers",
             duration: 30,
             videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
-            videoQuery: "mountain climbers exercise"
-
+            videoQuery: "mountain climbers core exercise gym",
+            met: 8.0
         }
     ]
 };

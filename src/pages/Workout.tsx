@@ -19,8 +19,73 @@ export default function Workout() {
     const [currentVideoUrl, setCurrentVideoUrl] = useState(DAY_1_WORKOUT.exercises[0].videoUrl);
 
     const videoRef = useRef<HTMLVideoElement>(null);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const asmrAudioRef = useRef<HTMLAudioElement | null>(null);
+
     const program = DAY_1_WORKOUT;
     const currentStep = program.exercises[currentExerciseIndex];
+
+    // Initialize audio
+    useEffect(() => {
+        // Using a more stable direct link for nature ambiance
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2432/2432-preview.mp3'); // Forest birds sound
+        audio.loop = true;
+
+        audio.addEventListener('canplaythrough', () => {
+            console.log("ASMR Audio loaded and ready");
+        });
+
+        audio.addEventListener('error', (e) => {
+            console.error("ASMR Audio load error:", e);
+        });
+
+        asmrAudioRef.current = audio;
+
+        return () => {
+            if (asmrAudioRef.current) {
+                asmrAudioRef.current.pause();
+                asmrAudioRef.current = null;
+            }
+        };
+    }, []);
+
+    const playTick = () => {
+        if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+
+        const ctx = audioContextRef.current;
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime); // High pitch tick
+
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+    };
+
+    const playASMR = () => {
+        if (asmrAudioRef.current && asmrAudioRef.current.paused) {
+            asmrAudioRef.current.play().catch(e => console.error("ASMR play error:", e));
+        }
+    };
+
+    const stopASMR = () => {
+        if (asmrAudioRef.current && !asmrAudioRef.current.paused) {
+            asmrAudioRef.current.pause();
+        }
+    };
 
     // Fetch video from Pexels when step changes
     useEffect(() => {
@@ -49,7 +114,15 @@ export default function Workout() {
         let timer: any;
         if (isPlaying && !isFinished && !isLoadingVideo) {
             timer = setInterval(() => {
-                setTimeLeftInStep(prev => prev - 1);
+                setTimeLeftInStep(prev => {
+                    if (prev > 0) {
+                        if (!currentStep.isRest) {
+                            playTick();
+                        }
+                        return prev - 1;
+                    }
+                    return 0;
+                });
             }, 1000);
         }
 
@@ -72,11 +145,30 @@ export default function Workout() {
         return () => clearInterval(timer);
     }, [isPlaying, timeLeftInStep, currentExerciseIndex, isFinished, program.exercises, completeWorkout, isLoadingVideo]);
 
+    // Handle ASMR for rest periods
+    useEffect(() => {
+        if (isPlaying && currentStep.isRest && !isFinished) {
+            playASMR();
+        } else {
+            stopASMR();
+        }
+    }, [isPlaying, currentStep.isRest, isFinished]);
+
 
 
     const handleStart = () => {
         setHasStarted(true);
         setIsPlaying(true);
+
+        // Unlock ASMR audio by playing/pausing on first user gesture
+        if (asmrAudioRef.current) {
+            asmrAudioRef.current.play().then(() => {
+                if (!currentStep.isRest) {
+                    asmrAudioRef.current?.pause();
+                }
+            }).catch(e => console.error("Audio unlock error:", e));
+        }
+
         if (videoRef.current) {
             videoRef.current.play().catch(e => console.error("Video play error start:", e));
         }

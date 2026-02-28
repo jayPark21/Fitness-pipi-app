@@ -4,6 +4,8 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Workout from './pages/Workout';
 import Subscription from './pages/Subscription';
+import History from './pages/History';
+import Shop from './pages/Shop';
 import { useEffect } from 'react';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -42,6 +44,8 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/workout" element={<Workout />} />
               <Route path="/subscription" element={<Subscription />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/shop" element={<Shop />} />
             </Routes>
           </div>
         </div>

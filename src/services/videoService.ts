@@ -28,7 +28,11 @@ class VideoService {
         }
 
         try {
-            const response = await fetch(`${PEXELS_API_URL}?query=${encodeURIComponent(query)}&per_page=1`, {
+            const searchQuery = (query.includes('exercise') || query.includes('fitness') || query.includes('nature') || query.includes('forest'))
+                ? query
+                : `${query} fitness exercise`;
+
+            const response = await fetch(`${PEXELS_API_URL}?query=${encodeURIComponent(searchQuery)}&per_page=1`, {
                 headers: {
                     Authorization: API_KEY,
                 },
