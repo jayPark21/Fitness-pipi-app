@@ -63,21 +63,21 @@ export default function Shop() {
             </header>
 
             <main className="flex-1 max-w-4xl mx-auto w-full pt-28 pb-32 px-6">
-                {/* Category Selector */}
-                <div className="flex gap-2 mb-10 overflow-x-auto no-scrollbar pb-2">
+                {/* Category Selector - grid so all 4 buttons fit on any screen width */}
+                <div className="grid grid-cols-4 gap-2 mb-8">
                     {categories.map(cat => (
                         <button
                             key={cat.id}
                             onClick={() => setSelectedCategory(cat.id)}
                             className={`
-                                flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-tight transition-all whitespace-nowrap border-2
+                                flex flex-col items-center justify-center gap-1 py-3 rounded-2xl font-black text-[10px] uppercase tracking-tight transition-all border-2
                                 ${selectedCategory === cat.id
                                     ? 'bg-primary-500 border-primary-500 text-slate-950 shadow-[0_0_20px_rgba(45,212,191,0.3)]'
                                     : 'bg-slate-800/40 border-slate-800 text-slate-400 hover:border-slate-700'}
                             `}
                         >
-                            <span>{cat.icon}</span>
-                            {cat.label}
+                            <span className="text-xl">{cat.icon}</span>
+                            <span>{cat.label}</span>
                         </button>
                     ))}
                 </div>
