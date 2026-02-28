@@ -22,15 +22,20 @@ export default function Shop() {
     const handleAction = (item: ShopItem) => {
         const isOwned = (penguin.ownedItems ?? []).includes(item.id);
         if (isOwned) {
+            // 소유 중 → 장착/해제 토글
             const isEquipped = penguin.equippedItems?.[item.category as keyof typeof penguin.equippedItems] === item.id;
             if (isEquipped) {
-                equipItem(item.category, undefined);
+                equipItem(item.category, undefined);   // 해제
             } else {
-                equipItem(item.category, item.id);
+                equipItem(item.category, item.id);     // 장착
             }
         } else {
+            // 미소유 → 구매 + 즉시 자동 장착! 🎉
             if (penguin.xp >= item.price) {
-                buyItem(item.id, item.price);
+                const success = buyItem(item.id, item.price);
+                if (success) {
+                    equipItem(item.category, item.id); // 구매 즉시 장착
+                }
             }
         }
     };
