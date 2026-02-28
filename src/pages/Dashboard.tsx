@@ -123,6 +123,19 @@ export default function Dashboard() {
                             <ChallengeMap currentDay={userState.currentDay} />
                         </div>
 
+                        {/* 🐧 말풍선: 피피 박스 위에 독립 배치 */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8, y: 6 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            key={speechText}
+                            className="flex items-start gap-2 mb-3"
+                        >
+                            <div className="bg-white text-slate-900 px-5 py-2.5 rounded-2xl rounded-bl-none font-bold text-sm shadow-lg border border-slate-200 relative">
+                                {speechText}
+                                <div className="absolute -bottom-2 left-3 w-4 h-4 bg-white rotate-45 border-b border-r border-slate-200"></div>
+                            </div>
+                        </motion.div>
+
                         {/* Penguin Pet Area */}
                         <div className={`flex-1 flex flex-col items-center justify-center p-8 rounded-3xl border relative overflow-hidden min-h-[450px] transition-all duration-700 ${bgTheme
                                 ? `bg-gradient-to-br ${bgTheme.gradient} border-teal-500/30`
@@ -140,16 +153,7 @@ export default function Dashboard() {
                                 </div>
                             )}
 
-                            {/* Speech Bubble */}
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                key={speechText}
-                                className="absolute top-10 z-20 bg-white text-slate-900 px-6 py-3 rounded-2xl rounded-bl-none font-bold text-sm shadow-xl border-2 border-slate-200"
-                            >
-                                {speechText}
-                                <div className="absolute -bottom-2 left-0 w-4 h-4 bg-white rotate-45 border-b-2 border-r-2 border-slate-200"></div>
-                            </motion.div>
+
 
                             <motion.div
                                 onClick={handlePet}
