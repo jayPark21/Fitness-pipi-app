@@ -222,15 +222,15 @@ export default function Workout() {
                         </motion.div>
                     </div>
 
-                    <div className="flex flex-col items-center md:items-start my-8 md:my-0">
+                    <div className="flex flex-col items-center md:items-start my-6 md:my-0">
                         {!isFinished ? (
                             <div className="flex flex-col items-center md:items-start">
                                 <div className="relative">
                                     <motion.span
                                         key={timeLeftInStep}
-                                        initial={{ opacity: 0, scale: 0.5, filter: 'blur(10px)' }}
-                                        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                        className={`text-[10rem] md:text-[14rem] leading-[0.8] font-black text-transparent bg-clip-text font-mono tracking-tighter italic ${currentStep.isRest ? 'bg-gradient-to-b from-yellow-300 to-orange-500' : 'bg-gradient-to-b from-primary-400 to-primary-700'}`}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className={`text-[8rem] sm:text-[10rem] md:text-[14rem] leading-[0.8] font-black font-mono tracking-tighter italic ${currentStep.isRest ? 'text-orange-500 bg-gradient-to-b from-yellow-300 to-orange-500' : 'text-primary-500 bg-gradient-to-b from-primary-400 to-primary-700'} bg-clip-text text-transparent`}
                                     >
                                         {timeLeftInStep.toString().padStart(2, '0')}
                                     </motion.span>
@@ -238,9 +238,9 @@ export default function Workout() {
                                         SECONDS
                                     </div>
                                 </div>
-                                <div className="mt-4 flex items-center gap-4 text-slate-500 font-black uppercase tracking-widest text-sm italic">
+                                <div className="mt-2 flex items-center gap-4 text-slate-500 font-black uppercase tracking-widest text-xs italic">
                                     <span>Stay Focused</span>
-                                    <div className="w-8 h-[2px] bg-slate-800" />
+                                    <div className="w-8 h-[1px] bg-slate-800" />
                                     <span>Keep Moving</span>
                                 </div>
                             </div>
