@@ -2,10 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { PlayCircle, Crown, History as HistoryIcon, Calendar, X, ShoppingBag } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ChallengeMap from '../components/ChallengeMap';
 import { SHOP_ITEMS } from '../data/shopItems';
 import NotificationBanner from '../components/NotificationBanner';
+import InventoryTray from '../components/InventoryTray';
 
 import eggImg from '../assets/pipi/egg.png';
 import crackedImg from '../assets/pipi/cracked.png';
@@ -17,6 +18,7 @@ export default function Dashboard() {
     const { userState, penguin, interactWithPipi } = useStore();
     const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
     const [speechText, setSpeechText] = useState("");
+    const pipiZoneRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const messages = {
@@ -138,8 +140,8 @@ export default function Dashboard() {
 
                         {/* Penguin Pet Area */}
                         <div className={`flex-1 flex flex-col items-center justify-center p-8 rounded-3xl border relative overflow-hidden min-h-[450px] transition-all duration-700 ${bgTheme
-                                ? `bg-gradient-to-br ${bgTheme.gradient} border-teal-500/30`
-                                : 'bg-slate-800/20 border-slate-800/50'
+                            ? `bg-gradient-to-br ${bgTheme.gradient} border-teal-500/30`
+                            : 'bg-slate-800/20 border-slate-800/50'
                             }`}>
                             <div className="absolute inset-0 bg-primary-500 blur-[120px] rounded-full opacity-5 animate-pulse"></div>
 
@@ -156,6 +158,7 @@ export default function Dashboard() {
 
 
                             <motion.div
+                                ref={pipiZoneRef}
                                 onClick={handlePet}
                                 className="w-64 h-64 relative cursor-pointer group z-10"
                                 whileTap={{ scale: 0.9 }}
@@ -253,6 +256,9 @@ export default function Dashboard() {
                                     {penguin.mood === 'happy' ? 'Pipi is pumped up and ready to rumble!' : 'He looks a bit tired. Let\'s move together!'}
                                 </p>
                             </div>
+
+                            {/* 인벤토리 트레이: 드래그해서 피피에 장착 */}
+                            <InventoryTray pipiZoneRef={pipiZoneRef} />
                         </div>
                     </div>
 
