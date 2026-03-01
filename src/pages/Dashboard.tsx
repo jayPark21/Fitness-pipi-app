@@ -12,6 +12,9 @@ import eggImg from '../assets/pipi/egg.png';
 import crackedImg from '../assets/pipi/cracked.png';
 import babyImg from '../assets/pipi/baby.png';
 import adultImg from '../assets/pipi/adult.png';
+import adultCrownImg from '../assets/pipi/adult_crown.png';
+import adultCapImg from '../assets/pipi/adult_cap.png';
+import adultShadesImg from '../assets/pipi/adult_shades.png';
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -145,6 +148,17 @@ export default function Dashboard() {
                             }`}>
                             <div className="absolute inset-0 bg-primary-500 blur-[120px] rounded-full opacity-5 animate-pulse"></div>
 
+                            {/* 변신 효과용 섬광 오버레이 */}
+                            <AnimatePresence>
+                                <motion.div
+                                    key={penguin.equippedItems?.hat || penguin.equippedItems?.glasses}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: [0, 0.8, 0] }}
+                                    transition={{ duration: 0.5 }}
+                                    className="absolute inset-0 bg-white z-30 pointer-events-none mix-blend-overlay"
+                                />
+                            </AnimatePresence>
+
                             {/* 장착된 배경 표시 (우측 하단 뱃지) */}
                             {bgTheme && (
                                 <div className="absolute bottom-4 right-4 z-20 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-1.5">
@@ -171,13 +185,17 @@ export default function Dashboard() {
                                         }}
                                         transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                                     >
-                                        {/* Character Evolutionary Stage */}
+                                        {/* Character Evolutionary Stage & Item Integration */}
                                         <image
                                             href={
-                                                penguin.friendshipLevel >= 10 ? adultImg :
-                                                    penguin.friendshipLevel >= 3 ? babyImg :
+                                                penguin.friendshipLevel >= 10
+                                                    ? (penguin.equippedItems?.hat === 'crown-gold' ? adultCrownImg :
+                                                        penguin.equippedItems?.hat === 'cap-red' ? adultCapImg :
+                                                            penguin.equippedItems?.glasses === 'sunglasses-cool' ? adultShadesImg :
+                                                                adultImg)
+                                                    : (penguin.friendshipLevel >= 3 ? babyImg :
                                                         penguin.friendshipLevel === 2 ? crackedImg :
-                                                            eggImg
+                                                            eggImg)
                                             }
                                             x="0" y="0" width="200" height="200"
                                             className="rounded-full"
@@ -210,14 +228,14 @@ export default function Dashboard() {
                                             </g>
                                         )}
 
-                                        {/* 🧢 모자: 피피 머리 위 */}
-                                        {penguin.equippedItems?.hat && (
+                                        {/* 🧢 모자: 이미지에 포함되지 않은 경우만 이모지 표시 */}
+                                        {penguin.equippedItems?.hat && !['crown-gold', 'cap-red'].includes(penguin.equippedItems.hat) && (
                                             <text x="100" y="55" fontSize="52" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat)?.icon}
                                             </text>
                                         )}
-                                        {/* 🕶️ 안경: 피피 눈 위치 */}
-                                        {penguin.equippedItems?.glasses && (
+                                        {/* 🕶️ 안경: 이미지에 포함되지 않은 경우만 이모지 표시 */}
+                                        {penguin.equippedItems?.glasses && penguin.equippedItems.glasses !== 'sunglasses-cool' && (
                                             <text x="100" y="98" fontSize="36" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.glasses)?.icon}
                                             </text>
