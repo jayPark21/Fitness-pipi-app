@@ -15,6 +15,9 @@ import adultImg from '../assets/pipi/adult.png';
 import adultCrownImg from '../assets/pipi/adult_crown.png';
 import adultCapImg from '../assets/pipi/adult_cap.png';
 import adultShadesImg from '../assets/pipi/adult_shades.png';
+import bgGymImg from '../assets/pipi/bg_gym.png';
+import bgBeachImg from '../assets/pipi/bg_beach.png';
+
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -57,9 +60,9 @@ export default function Dashboard() {
     };
 
     // 배경 테마 맵핑
-    const BG_THEMES: Record<string, { gradient: string; emoji: string }> = {
-        'bg-gym': { gradient: 'from-slate-600/50 via-slate-800/60 to-zinc-900/80', emoji: '🏢' },
-        'bg-beach': { gradient: 'from-sky-500/30 via-cyan-400/10 to-amber-400/20', emoji: '🏖️' },
+    const BG_THEMES: Record<string, { gradient: string; emoji: string; image?: string }> = {
+        'bg-gym': { gradient: 'from-teal-100/30 via-white/10 to-emerald-200/20', emoji: '🏢', image: bgGymImg },
+        'bg-beach': { gradient: 'from-sky-200/30 via-white/10 to-amber-200/20', emoji: '🏖️', image: bgBeachImg },
     };
     const equippedBg = penguin.equippedItems?.background;
     const bgTheme = equippedBg ? BG_THEMES[equippedBg] : null;
@@ -147,6 +150,21 @@ export default function Dashboard() {
                             : 'bg-slate-800/20 border-slate-800/50'
                             }`}>
                             <div className="absolute inset-0 bg-primary-500 blur-[120px] rounded-full opacity-5 animate-pulse"></div>
+
+                            {/* 프리미엄 2D 배경 이미지 */}
+                            {bgTheme?.image && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    key={bgTheme.image}
+                                    className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"
+                                    style={{ backgroundImage: `url(${bgTheme.image})` }}
+                                />
+                            )}
+                            {/* 배경 위 오버레이 (캐릭터가 잘 보이게 하고 무드 강조) */}
+                            {bgTheme && (
+                                <div className={`absolute inset-0 z-[1] opacity-30 bg-gradient-to-br ${bgTheme.gradient}`}></div>
+                            )}
 
                             {/* 변신 효과용 섬광 오버레이 */}
                             <AnimatePresence>
