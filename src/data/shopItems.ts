@@ -11,11 +11,11 @@ export const SHOP_ITEMS: ShopItem[] = [
     // HATS
     {
         id: 'cap-red',
-        name: 'Red Sprint Cap',
+        name: 'Red Training Cap',
         category: 'hat',
         price: 200,
-        icon: '🧢',
-        description: 'Aerodynamic cap for faster reps.'
+        icon: '🔴🧢',
+        description: 'Elite red cap for high-intensity training.'
     },
     {
         id: 'crown-gold',
