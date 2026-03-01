@@ -5,6 +5,7 @@ export interface ShopItem {
     price: number;
     icon: string;
     description: string;
+    requiredLevel?: number;
 }
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -15,7 +16,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'hat',
         price: 200,
         icon: '🧢',
-        description: 'Cool blue cap for comfortable training.'
+        description: 'Cool blue cap for comfortable training.',
+        requiredLevel: 10
     },
     {
         id: 'crown-gold',
@@ -23,7 +25,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'hat',
         price: 2000,
         icon: '👑',
-        description: 'Only for those who have conquered the peak.'
+        description: 'Only for those who have conquered the peak.',
+        requiredLevel: 10
     },
     {
         id: 'ninja-band',
@@ -31,7 +34,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'hat',
         price: 500,
         icon: '🥷',
-        description: 'Silence your excuses.'
+        description: 'Silence your excuses.',
+        requiredLevel: 10
     },
 
     // GLASSES
@@ -41,7 +45,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'glasses',
         price: 400,
         icon: '🕶️',
-        description: 'Look cool while burning calories.'
+        description: 'Look cool while burning calories.',
+        requiredLevel: 10
     },
     {
         id: 'monocle-fancy',
@@ -49,7 +54,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'glasses',
         price: 800,
         icon: '🧐',
-        description: 'Analyze every muscle fiber.'
+        description: 'Analyze every muscle fiber.',
+        requiredLevel: 10
     },
 
     // ACCESSORIES
@@ -59,7 +65,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'accessory',
         price: 1500,
         icon: '🥇',
-        description: 'You are a champion.'
+        description: 'You are a champion.',
+        requiredLevel: 3
     },
     {
         id: 'dumbbell',
@@ -67,7 +74,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'accessory',
         price: 300,
         icon: '🏋️',
-        description: 'Pipi also wants to lift.'
+        description: 'Pipi also wants to lift.',
+        requiredLevel: 3
     },
 
     // BACKGROUNDS
@@ -77,7 +85,8 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'background',
         price: 1000,
         icon: '🏢',
-        description: 'The classic gym vibe.'
+        description: 'The classic gym vibe.',
+        requiredLevel: 10
     },
     {
         id: 'bg-beach',
@@ -85,6 +94,7 @@ export const SHOP_ITEMS: ShopItem[] = [
         category: 'background',
         price: 1200,
         icon: '🏖️',
-        description: 'Workout with a sea breeze.'
+        description: 'Workout with a sea breeze.',
+        requiredLevel: 10
     }
 ];

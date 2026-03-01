@@ -18,6 +18,9 @@ interface PenguinState {
         accessory?: string;
         background?: string;
     };
+    dailyTouchXp: number;
+    lastTouchDate: string;
+    workoutsCompletedToday: number;
 }
 
 interface WorkoutSession {
@@ -75,13 +78,43 @@ export const useStore = create<AppStore>()(
                 lastInteractionTime: new Date().toISOString(),
                 ownedItems: [],
                 equippedItems: {},
+                dailyTouchXp: 0,
+                lastTouchDate: new Date().toDateString(),
+                workoutsCompletedToday: 0,
             },
             setUser: (user) => set({ user }),
             setUserState: (state) => set((prev) => ({ userState: { ...prev.userState, ...state } })),
             setPenguin: (state) => set((prev) => ({ penguin: { ...prev.penguin, ...state } })),
             feedPenguin: () => set((prev) => ({ penguin: { ...prev.penguin, mood: 'happy' } })),
-            interactWithPipi: () => set((prev) => {
-                const newXp = prev.penguin.xp + 5;
+            interactWithPipi: () => {
+                const today = new Date().toDateString();
+                const prev = useStore.getState();
+                const isNewDay = prev.penguin.lastTouchDate !== today;
+
+                // 새로운 날이면 일일 터치 XP 및 운동 횟수 초기화
+                const currentDailyXp = isNewDay ? 0 : (prev.penguin.dailyTouchXp ?? 0);
+                const currentWorkoutsToday = isNewDay ? 0 : (prev.penguin.workoutsCompletedToday ?? 0);
+
+                // 상한치: 기본 5번(25 XP) + (오늘 완료한 루틴 수 * 10번(50 XP))
+                const maxTouchXp = 25 + (currentWorkoutsToday * 50);
+
+                if (currentDailyXp >= maxTouchXp) {
+                    // 상한치 도달 - XP는 안 오르고 기분만 좋아짐
+                    set({
+                        penguin: {
+                            ...prev.penguin,
+                            mood: 'happy',
+                            dailyTouchXp: currentDailyXp,
+                            workoutsCompletedToday: currentWorkoutsToday,
+                            lastTouchDate: today,
+                            lastInteractionTime: new Date().toISOString()
+                        }
+                    });
+                    return; // XP 증가 없이 바로 종료
+                }
+
+                const xpGain = 5;
+                const newXp = prev.penguin.xp + xpGain;
                 let level = prev.penguin.friendshipLevel;
                 let nextXp = prev.penguin.nextLevelXp;
 
@@ -90,17 +123,23 @@ export const useStore = create<AppStore>()(
                     nextXp = Math.floor(nextXp * 1.5);
                 }
 
-                return {
+                set({
                     penguin: {
                         ...prev.penguin,
                         mood: 'happy',
                         xp: newXp,
                         friendshipLevel: level,
                         nextLevelXp: nextXp,
+                        dailyTouchXp: currentDailyXp + xpGain,
+                        workoutsCompletedToday: currentWorkoutsToday,
+                        lastTouchDate: today,
                         lastInteractionTime: new Date().toISOString()
                     }
-                };
-            }),
+                });
+
+                // ✅ 핵심 수정: Firestore에도 즉시 sync해서 새로고침 시에도 상한치 유지
+                useStore.getState().syncWithFirestore();
+            },
             completeWorkout: () => set((prev) => {
                 const program = DAY_1_WORKOUT;
                 let totalCalories = 0;
@@ -126,27 +165,32 @@ export const useStore = create<AppStore>()(
                     duration: totalDuration
                 };
 
-                const newXpValue = prev.penguin.xp + 100;
+                const newXpTotal = prev.penguin.xp + 100;
                 let level = prev.penguin.friendshipLevel;
-                let nextXp = prev.penguin.nextLevelXp;
+                let nextLevelXp = prev.penguin.nextLevelXp;
 
-                if (newXpValue >= nextXp) {
+                if (newXpTotal >= nextLevelXp) {
                     level += 1;
-                    nextXp = Math.floor(nextXp * 1.5);
+                    nextLevelXp = Math.floor(nextLevelXp * 1.5);
                 }
 
-                // Achievement logic — badges/history가 undefined여도 안전하게 처리
-                const newBadges = [...(prev.userState.badges ?? [])];
-                const newStreak = (prev.userState.streak ?? 0) + 1;
+                // 새로운 날 체크 (터치 상한치 로직과 동일)
+                const today = new Date().toDateString();
+                const isNewDay = prev.penguin.lastTouchDate !== today;
+                const dailyWorkouts = isNewDay ? 1 : (prev.penguin.workoutsCompletedToday ?? 0) + 1;
 
-                if (newStreak === 3 && !newBadges.includes('streak-3')) newBadges.push('streak-3');
-                if (newStreak === 7 && !newBadges.includes('streak-7')) newBadges.push('streak-7');
+                // Achievement logic
+                const newBadges = [...(prev.userState.badges ?? [])];
+                const newStreakValue = (prev.userState.streak ?? 0) + 1;
+
+                if (newStreakValue === 3 && !newBadges.includes('streak-3')) newBadges.push('streak-3');
+                if (newStreakValue === 7 && !newBadges.includes('streak-7')) newBadges.push('streak-7');
                 if (level === 5 && !newBadges.includes('pipi-friend')) newBadges.push('pipi-friend');
 
                 return {
                     userState: {
                         ...prev.userState,
-                        streak: newStreak,
+                        streak: newStreakValue,
                         currentDay: (prev.userState.currentDay ?? 1) + 1,
                         history: [...(prev.userState.history ?? []), newSession],
                         badges: newBadges
@@ -155,8 +199,10 @@ export const useStore = create<AppStore>()(
                         ...prev.penguin,
                         mood: 'happy',
                         friendshipLevel: level,
-                        xp: newXpValue,
-                        nextLevelXp: nextXp
+                        xp: newXpTotal,
+                        nextLevelXp: nextLevelXp,
+                        workoutsCompletedToday: dailyWorkouts,
+                        lastTouchDate: today
                     }
                 };
             }),
@@ -177,19 +223,42 @@ export const useStore = create<AppStore>()(
                 }
             },
             fetchFromFirestore: async () => {
-                const { user } = useStore.getState();
+                const { user, penguin: localPenguin } = useStore.getState();
                 if (!user?.uid) return;
 
                 try {
                     const docSnap = await getDoc(doc(db, 'users', user.uid));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
+                        const remotePenguin = data.penguin;
+
+                        // ✅ 핵심 수정: 로컬의 dailyTouchXp가 더 크면 (오늘 세션) 그걸 유지
+                        // Firestore sync 지연으로 낡은 데이터가 덮어쓰는 걸 방지
+                        const today = new Date().toDateString();
+                        const localIsToday = localPenguin.lastTouchDate === today;
+                        const remoteIsToday = remotePenguin?.lastTouchDate === today;
+
+                        const mergedDailyTouchXp = (
+                            localIsToday && remoteIsToday
+                                ? Math.max(localPenguin.dailyTouchXp ?? 0, remotePenguin?.dailyTouchXp ?? 0)
+                                : (remoteIsToday ? remotePenguin?.dailyTouchXp ?? 0 : (localIsToday ? localPenguin.dailyTouchXp ?? 0 : 0))
+                        );
+                        const mergedWorkoutsToday = (
+                            localIsToday && remoteIsToday
+                                ? Math.max(localPenguin.workoutsCompletedToday ?? 0, remotePenguin?.workoutsCompletedToday ?? 0)
+                                : (remoteIsToday ? remotePenguin?.workoutsCompletedToday ?? 0 : (localIsToday ? localPenguin.workoutsCompletedToday ?? 0 : 0))
+                        );
+
                         set({
                             userState: data.userState,
-                            penguin: data.penguin
+                            penguin: {
+                                ...remotePenguin,
+                                dailyTouchXp: mergedDailyTouchXp,
+                                workoutsCompletedToday: mergedWorkoutsToday,
+                                lastTouchDate: (localIsToday || remoteIsToday) ? today : (remotePenguin?.lastTouchDate ?? today)
+                            }
                         });
-                        console.log("Firestore data fetched!");
-                        // Ensure name is migrated after fetch
+                        console.log("Firestore data fetched! (dailyTouchXp preserved)");
                         useStore.getState().renameToPipi();
                     }
                 } catch (error) {

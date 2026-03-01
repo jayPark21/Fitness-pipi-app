@@ -22,41 +22,86 @@ import bgBeachImg from '../assets/pipi/bg_beach.png';
 export default function Dashboard() {
     const navigate = useNavigate();
     const { userState, penguin, interactWithPipi } = useStore();
-    const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+    const [hearts, setHearts] = useState<{ id: number; x: number; y: number; isSparkle?: boolean }[]>([]);
     const [speechText, setSpeechText] = useState("");
     const pipiZoneRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const isEgg = penguin.friendshipLevel < 3;
+        const hour = new Date().getHours();
+
         const messages = {
-            happy: [
-                "Great work, Boss! Let's hit it! 🔥",
-                "I'm feeling strong today! 🐧",
-                "Your streak is looking spicy! Hot! 🌶️",
-                "Best partners ever! High five! ✋",
-                "Ready for our next mission? 🚀"
-            ],
-            sad: [
-                "I'm a bit low on energy... 🔋",
-                "A quick workout would cheer me up! 💧",
-                "Missing our routine, Boss... 😔",
-                "Let's get moving! I believe in you! ✨"
-            ],
-            hungry: ["Is it workout time? I'm starving for gains! 🍎"],
-            sleeping: ["Zzz... Dreaming of pushups... 💤"]
+            egg: ["...", "🥚?", "✨...?", "(꿈틀!)"],
+            happy: {
+                morning: ["대표님! 기분 좋은 아침이에요! 🌤️", "오늘도 저랑 같이 달려보실거죠? 🔥"],
+                day: ["대표님! 지금 딱 운동하기 좋은 시간인데! 💪", "저랑 노는 게 제일 재밌죠? 헤헤 🐧", "우와! 대표님 어깨가 더 넓어진 것 같아요! ✨"],
+                evening: ["오늘 하루도 수고 많으셨어요! 대표님 최고! 🫡", "내일을 위해 오늘은 푹 쉬어요! 🌙"],
+            },
+            sad: ["대표님... 어디 가셨어요? 보고 싶었어요... 😔", "저 조금 외로운 것 같아요... 💧", "다시 같이 땀 흘리고 싶어요! ✨"],
+            hungry: ["대표님! 제 근육들이 배고프다고 소리 질러요! 🍎", "득근득근! 운동 연료가 필요합니다! 🔥"],
+            sleeping: ["Zzz... 대표님이 내일 운동하는 꿈... 💤", "쉿! 피피는 지금 벌크업 중... 🌙"]
         };
 
-        const currentMessages = messages[penguin.mood as keyof typeof messages] || messages.happy;
-        const randomMsg = currentMessages[Math.floor(Math.random() * currentMessages.length)];
-        setSpeechText(randomMsg);
-    }, [penguin.mood, userState.streak]);
+        if (isEgg) {
+            setSpeechText(messages.egg[Math.floor(Math.random() * messages.egg.length)]);
+            return;
+        }
 
-    const handlePet = (e: React.MouseEvent) => {
+        let timeKey: 'morning' | 'day' | 'evening' = 'day';
+        if (hour >= 5 && hour < 12) timeKey = 'morning';
+        else if (hour >= 18 || hour < 5) timeKey = 'evening';
+
+        const getMoodMsg = () => {
+            if (penguin.mood === 'happy') {
+                const list = messages.happy[timeKey];
+                return list[Math.floor(Math.random() * list.length)];
+            }
+            const list = messages[penguin.mood as keyof typeof messages] as string[];
+            return list?.[Math.floor(Math.random() * (list?.length || 1))] || "대표님 화이팅! 🔥";
+        }
+
+        setSpeechText(getMoodMsg());
+    }, [penguin.mood, userState.streak, penguin.friendshipLevel]);
+
+    const handlePet = (e: React.MouseEvent | React.TouchEvent) => {
+        const today = new Date().toDateString();
+        const workoutsToday = (penguin.lastTouchDate === today) ? (penguin.workoutsCompletedToday ?? 0) : 0;
+        const maxTouchXp = 25 + (workoutsToday * 50);
+        const isLimitReached = (penguin.dailyTouchXp ?? 0) >= maxTouchXp && penguin.lastTouchDate === today;
+        const isEgg = penguin.friendshipLevel < 3;
+
         interactWithPipi();
-        const newHeart = { id: Date.now(), x: e.clientX, y: e.clientY };
-        setHearts(prev => [...prev, newHeart]);
-        setTimeout(() => {
-            setHearts(prev => prev.filter(h => h.id !== newHeart.id));
-        }, 1000);
+
+        const petMessages = isEgg
+            ? ["(움찔!)", "(따뜻...)", "✨", "💓"]
+            : [
+                "아잉~! 기분 좋아라! 😍",
+                "헤헤, 간질간질해요! 🐧",
+                "우와! 대표님 손은 진짜 따뜻해요! 🔥",
+                "대표님이 만져주시니까 힘이 솟아요! 💪",
+                "저 진짜 대표님 너무 좋아해요! (부끄...)"
+            ];
+
+        if (isLimitReached) {
+            setSpeechText("아잉~~ 운동하고 만져줘~~ 😍");
+        } else {
+            const randomPetMsg = petMessages[Math.floor(Math.random() * petMessages.length)];
+            setSpeechText(randomPetMsg);
+        }
+
+        // 하트/반짝이 효과 로직
+        const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
+        const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
+
+        if (isLimitReached) {
+            const newSparkle = { id: Date.now(), x: clientX, y: clientY };
+            setHearts(prev => [...prev, { ...newSparkle, isSparkle: true }]);
+            setTimeout(() => setHearts(prev => prev.filter(h => h.id !== newSparkle.id)), 1000);
+        } else {
+            const newHeart = { id: Date.now(), x: clientX, y: clientY };
+            setHearts(prev => [...prev, newHeart]);
+            setTimeout(() => setHearts(prev => prev.filter(h => h.id !== newHeart.id)), 1000);
+        }
     };
 
     // 배경 테마 맵핑
@@ -65,22 +110,24 @@ export default function Dashboard() {
         'bg-beach': { gradient: 'from-sky-200/30 via-white/10 to-amber-200/20', emoji: '🏖️', image: bgBeachImg },
     };
     const equippedBg = penguin.equippedItems?.background;
-    const bgTheme = equippedBg ? BG_THEMES[equippedBg] : null;
+    const isAdult = penguin.friendshipLevel >= 10;
+    const isEgg = penguin.friendshipLevel < 3;
+    const bgTheme = (equippedBg && isAdult) ? BG_THEMES[equippedBg] : null;
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-900 border-x border-slate-800">
-            {/* Heart Particles */}
+            {/* Heart Particles / Sparkles */}
             <AnimatePresence>
                 {hearts.map(heart => (
                     <motion.div
                         key={heart.id}
                         initial={{ opacity: 1, scale: 0.5, y: heart.y }}
-                        animate={{ opacity: 0, scale: 1.5, y: heart.y - 100, x: heart.x + (Math.random() * 40 - 20) }}
+                        animate={{ opacity: 0, scale: 1.5, y: heart.y - 120, x: heart.x + (Math.random() * 60 - 30) }}
                         exit={{ opacity: 0 }}
                         className="fixed pointer-events-none z-[100] text-2xl"
                         style={{ left: heart.x - 12, top: heart.y - 12 }}
                     >
-                        ❤️
+                        {heart.isSparkle ? '✨' : '❤️'}
                     </motion.div>
                 ))}
             </AnimatePresence>
@@ -191,7 +238,7 @@ export default function Dashboard() {
 
                             <motion.div
                                 ref={pipiZoneRef}
-                                onClick={handlePet}
+                                onPointerDown={handlePet}
                                 className="w-64 h-64 relative cursor-pointer group z-10"
                                 whileTap={{ scale: 0.9 }}
                             >
@@ -230,7 +277,7 @@ export default function Dashboard() {
                                         )}
 
                                         {/* Headband / Ninja Mask (Premium Only, for Baby/Adult stages) */}
-                                        {userState.hasPremium && penguin.friendshipLevel >= 3 && !penguin.equippedItems?.hat && (
+                                        {userState.hasPremium && penguin.friendshipLevel >= 10 && !penguin.equippedItems?.hat && (
                                             <g>
                                                 <rect x="40" y="70" width="120" height="25" rx="4" fill="#1e1b4b" stroke="#312e81" strokeWidth="1" />
                                                 <motion.path
@@ -246,8 +293,8 @@ export default function Dashboard() {
                                             </g>
                                         )}
 
-                                        {/* 🥷 닌자 밴드 (SVG 직접 구현) */}
-                                        {penguin.equippedItems?.hat === 'ninja-band' && (
+                                        {/* 🥷 닌자 밴드 (SVG 직접 구현) - Adult Only */}
+                                        {isAdult && penguin.equippedItems?.hat === 'ninja-band' && (
                                             <g>
                                                 <rect x="35" y="70" width="130" height="28" rx="4" fill="#111" />
                                                 <rect x="80" y="72" width="40" height="24" rx="2" fill="#94a3b8" />
@@ -261,8 +308,8 @@ export default function Dashboard() {
                                             </g>
                                         )}
 
-                                        {/* 🧐 모노클 (SVG 직접 구현) */}
-                                        {penguin.equippedItems?.glasses === 'monocle-fancy' && (
+                                        {/* 🧐 모노클 (SVG 직접 구현) - Adult Only (Lv.10+) */}
+                                        {isAdult && penguin.equippedItems?.glasses === 'monocle-fancy' && (
                                             <g>
                                                 <circle cx="85" cy="95" r="22" fill="none" stroke="#fbbf24" strokeWidth="3" />
                                                 <line x1="63" y1="95" x2="40" y2="150" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 2" />
@@ -271,19 +318,35 @@ export default function Dashboard() {
                                         )}
 
                                         {/* 🧢 모자 / 🕶️ 선글라스: 이미지에 포함되지 않은 경우만 이모지 표시 (SVG 구현이 없는 경우) */}
-                                        {penguin.equippedItems?.hat && !['crown-gold', 'cap-red', 'ninja-band'].includes(penguin.equippedItems.hat) && (
-                                            <text x="100" y="55" fontSize="52" textAnchor="middle">
-                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat)?.icon}
-                                            </text>
-                                        )}
+                                        {!isEgg && penguin.equippedItems?.hat && (() => {
+                                            const item = SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat);
+                                            const isPremium = (item?.requiredLevel ?? 0) >= 10;
+                                            if (!isPremium) {
+                                                return (
+                                                    <text x="100" y="55" fontSize="52" textAnchor="middle">
+                                                        {item?.icon}
+                                                    </text>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+
                                         {/* 🕶️ 안경: 이미지에 포함되지 않은 경우만 이모지 표시 */}
-                                        {penguin.equippedItems?.glasses && penguin.equippedItems.glasses !== 'sunglasses-cool' && (
-                                            <text x="100" y="98" fontSize="36" textAnchor="middle">
-                                                {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.glasses)?.icon}
-                                            </text>
-                                        )}
+                                        {!isEgg && penguin.equippedItems?.glasses && (() => {
+                                            const item = SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.glasses);
+                                            const isPremium = (item?.requiredLevel ?? 0) >= 10;
+                                            if (!isPremium) {
+                                                return (
+                                                    <text x="100" y="98" fontSize="36" textAnchor="middle">
+                                                        {item?.icon}
+                                                    </text>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+
                                         {/* 🎒 악세서리: 피피 우측 하단 */}
-                                        {penguin.equippedItems?.accessory && (
+                                        {!isEgg && penguin.equippedItems?.accessory && (
                                             <text x="165" y="165" fontSize="34" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.accessory)?.icon}
                                             </text>
@@ -309,6 +372,26 @@ export default function Dashboard() {
                                             animate={{ width: `${(penguin.xp / penguin.nextLevelXp) * 100}%` }}
                                             className="h-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.5)]"
                                         />
+                                    </div>
+
+                                    {/* Daily Touch XP Limit Bar (Dynamic) */}
+                                    <div className="mt-3 bg-slate-800/40 p-2.5 rounded-xl border border-white/5">
+                                        <div className="flex justify-between items-center mb-1.5 px-0.5">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-[8px] font-black tracking-widest text-slate-500 uppercase">Pet Benefit</span>
+                                                {penguin.workoutsCompletedToday > 0 && (
+                                                    <span className="text-[7px] bg-amber-500/20 text-amber-400 px-1 rounded-sm font-bold border border-amber-500/10">BONUS +{(penguin.workoutsCompletedToday * 10)} pets</span>
+                                                )}
+                                            </div>
+                                            <span className="text-[9px] font-black text-amber-400">{(penguin.dailyTouchXp ?? 0)} / {25 + (penguin.workoutsCompletedToday * 50)} XP</span>
+                                        </div>
+                                        <div className="w-full bg-slate-700/30 rounded-full h-1 overflow-hidden">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${Math.min((penguin.dailyTouchXp ?? 0) / (25 + (penguin.workoutsCompletedToday * 50)) * 100, 100)}%` }}
+                                                className="h-full bg-amber-400 shadow-[0_0_5px_rgba(251,191,36,0.3)]"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 

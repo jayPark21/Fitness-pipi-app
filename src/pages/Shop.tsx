@@ -21,7 +21,11 @@ export default function Shop() {
 
     const handleAction = (item: ShopItem) => {
         const isOwned = (penguin.ownedItems ?? []).includes(item.id);
+        const req = item.requiredLevel || 0;
+        const canEquip = penguin.friendshipLevel >= req;
+
         if (isOwned) {
+            if (!canEquip) return; // 레벨 안되면 클릭 무시 (UI에서 이미 처리하지만 보강)
             // 소유 중 → 장착/해제 토글
             const isEquipped = penguin.equippedItems?.[item.category as keyof typeof penguin.equippedItems] === item.id;
             if (isEquipped) {
@@ -30,11 +34,12 @@ export default function Shop() {
                 equipItem(item.category, item.id);     // 장착
             }
         } else {
-            // 미소유 → 구매 + 즉시 자동 장착! 🎉
+            // 미소유 → 구매 + 조건부 즉시 자동 장착! 🎉
             if (penguin.xp >= item.price) {
                 const success = buyItem(item.id, item.price);
-                if (success) {
-                    equipItem(item.category, item.id); // 구매 즉시 장착
+                if (success && canEquip) {
+                    // 구매 성공 + 레벨 충족 시 즉시 장착!
+                    equipItem(item.category, item.id);
                 }
             }
         }
@@ -121,9 +126,13 @@ export default function Shop() {
                                     {isOwned ? (
                                         <div className={`
                                             w-full py-2 rounded-xl flex items-center justify-center gap-1 font-black text-[10px] uppercase tracking-widest transition-colors
-                                            ${isEquipped ? 'bg-teal-500 text-slate-950' : 'bg-slate-900/50 text-teal-400 group-hover:bg-teal-500/20'}
+                                            ${isEquipped
+                                                ? 'bg-teal-500 text-slate-950'
+                                                : penguin.friendshipLevel < (item.requiredLevel || 0)
+                                                    ? 'bg-slate-900/40 text-slate-600 border border-slate-800'
+                                                    : 'bg-slate-900/50 text-teal-400 group-hover:bg-teal-500/20'}
                                         `}>
-                                            {isEquipped ? 'Equipped' : 'Owned'}
+                                            {isEquipped ? 'Equipped' : (penguin.friendshipLevel < (item.requiredLevel || 0) ? `Lv.${item.requiredLevel} Req` : 'Owned')}
                                         </div>
                                     ) : (
                                         <div className={`
@@ -135,6 +144,12 @@ export default function Shop() {
                                         </div>
                                     )}
                                 </div>
+
+                                {penguin.friendshipLevel < (item.requiredLevel || 0) && !isOwned && (
+                                    <div className="absolute top-4 right-4 bg-slate-900/60 p-1.5 rounded-full border border-white/5 backdrop-blur-sm">
+                                        <span className="text-[8px] font-black text-slate-400">LV.{item.requiredLevel}</span>
+                                    </div>
+                                )}
 
                                 {isEquipped && (
                                     <div className="absolute top-4 right-4 bg-teal-500 p-1.5 rounded-full shadow-lg">
