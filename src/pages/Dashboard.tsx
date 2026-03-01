@@ -216,7 +216,7 @@ export default function Dashboard() {
                                                             eggImg)
                                             }
                                             x="0" y="0" width="200" height="200"
-                                            className="rounded-full"
+                                            className="drop-shadow-xl"
                                         />
 
                                         {/* Mood Indicators (Zzz for sleeping) */}
@@ -246,8 +246,32 @@ export default function Dashboard() {
                                             </g>
                                         )}
 
-                                        {/* 🧢 모자: 이미지에 포함되지 않은 경우만 이모지 표시 */}
-                                        {penguin.equippedItems?.hat && !['crown-gold', 'cap-red'].includes(penguin.equippedItems.hat) && (
+                                        {/* 🥷 닌자 밴드 (SVG 직접 구현) */}
+                                        {penguin.equippedItems?.hat === 'ninja-band' && (
+                                            <g>
+                                                <rect x="35" y="70" width="130" height="28" rx="4" fill="#111" />
+                                                <rect x="80" y="72" width="40" height="24" rx="2" fill="#94a3b8" />
+                                                <circle cx="95" cy="80" r="1.5" fill="#111" />
+                                                <circle cx="105" cy="80" r="1.5" fill="#111" />
+                                                <motion.path
+                                                    animate={{ rotate: [0, 10, 0], x: [0, 2, 0] }}
+                                                    transition={{ repeat: Infinity, duration: 2 }}
+                                                    d="M165 80 L185 75 L180 95 Z" fill="#111"
+                                                />
+                                            </g>
+                                        )}
+
+                                        {/* 🧐 모노클 (SVG 직접 구현) */}
+                                        {penguin.equippedItems?.glasses === 'monocle-fancy' && (
+                                            <g>
+                                                <circle cx="85" cy="95" r="22" fill="none" stroke="#fbbf24" strokeWidth="3" />
+                                                <line x1="63" y1="95" x2="40" y2="150" stroke="#fbbf24" strokeWidth="2" strokeDasharray="4 2" />
+                                                <circle cx="85" cy="95" r="18" fill="rgba(251, 191, 36, 0.1)" stroke="white" strokeWidth="0.5" />
+                                            </g>
+                                        )}
+
+                                        {/* 🧢 모자 / 🕶️ 선글라스: 이미지에 포함되지 않은 경우만 이모지 표시 (SVG 구현이 없는 경우) */}
+                                        {penguin.equippedItems?.hat && !['crown-gold', 'cap-red', 'ninja-band'].includes(penguin.equippedItems.hat) && (
                                             <text x="100" y="55" fontSize="52" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat)?.icon}
                                             </text>
