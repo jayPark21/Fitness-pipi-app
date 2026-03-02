@@ -3,26 +3,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import { PlayCircle, PauseCircle, X, CheckCircle2 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
-import { DAY_1_WORKOUT } from '../data/workouts';
+import { getWorkoutForDay } from '../data/workouts';
 import { videoService } from '../services/videoService';
 
 export default function Workout() {
     const navigate = useNavigate();
-    const { completeWorkout } = useStore();
+    const { completeWorkout, userState } = useStore();
+
+    // currentDay에 맞는 루틴 자동 선택!
+    const program = getWorkoutForDay(userState.currentDay);
 
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-    const [timeLeftInStep, setTimeLeftInStep] = useState(DAY_1_WORKOUT.exercises[0].duration);
+    const [timeLeftInStep, setTimeLeftInStep] = useState(program.exercises[0].duration);
     const [isPlaying, setIsPlaying] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [isLoadingVideo, setIsLoadingVideo] = useState(true);
-    const [currentVideoUrl, setCurrentVideoUrl] = useState(DAY_1_WORKOUT.exercises[0].videoUrl);
+    const [currentVideoUrl, setCurrentVideoUrl] = useState(program.exercises[0].videoUrl);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const asmrAudioRef = useRef<HTMLAudioElement | null>(null);
 
-    const program = DAY_1_WORKOUT;
     const currentStep = program.exercises[currentExerciseIndex];
 
     // Initialize audio

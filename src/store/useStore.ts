@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { db } from '../firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { DAY_1_WORKOUT } from '../data/workouts';
+import { getWorkoutForDay } from '../data/workouts';
 
 interface PenguinState {
     mood: 'happy' | 'sad' | 'hungry' | 'sleeping';
@@ -21,6 +21,7 @@ interface PenguinState {
     dailyTouchXp: number;
     lastTouchDate: string;
     workoutsCompletedToday: number;
+    justLeveledUp: boolean; // 🎉 레벨업 폭죽 트리거
 }
 
 interface WorkoutSession {
@@ -55,6 +56,9 @@ interface AppStore {
     renameToPipi: () => void;
     buyItem: (itemId: string, price: number) => boolean;
     equipItem: (category: string, itemId: string | undefined) => void;
+    resetStore: () => void;
+    checkAndUpdateMood: () => void;
+    clearLevelUp: () => void;
 }
 
 export const useStore = create<AppStore>()(
@@ -81,11 +85,67 @@ export const useStore = create<AppStore>()(
                 dailyTouchXp: 0,
                 lastTouchDate: new Date().toDateString(),
                 workoutsCompletedToday: 0,
+                justLeveledUp: false,
             },
             setUser: (user) => set({ user }),
             setUserState: (state) => set((prev) => ({ userState: { ...prev.userState, ...state } })),
             setPenguin: (state) => set((prev) => ({ penguin: { ...prev.penguin, ...state } })),
             feedPenguin: () => set((prev) => ({ penguin: { ...prev.penguin, mood: 'happy' } })),
+            resetStore: () => set({
+                userState: {
+                    streak: 0,
+                    currentDay: 1,
+                    hasPremium: false,
+                    history: [],
+                    badges: [],
+                    weight_kg: 70,
+                },
+                penguin: {
+                    mood: 'happy',
+                    friendshipLevel: 1,
+                    xp: 0,
+                    nextLevelXp: 100,
+                    name: 'pipi',
+                    lastInteractionTime: new Date().toISOString(),
+                    ownedItems: [],
+                    equippedItems: {},
+                    dailyTouchXp: 0,
+                    lastTouchDate: new Date().toDateString(),
+                    workoutsCompletedToday: 0,
+                    justLeveledUp: false,
+                }
+            }),
+            clearLevelUp: () => {
+                const prev = useStore.getState();
+                set({ penguin: { ...prev.penguin, justLeveledUp: false } });
+            },
+            // 피피 기분 자동 변화 시스템 편제하다!
+            // lastInteractionTime 기준 경과 시간으로 Mood 자동 업데이트
+            checkAndUpdateMood: () => {
+                const prev = useStore.getState();
+                const lastTime = new Date(prev.penguin.lastInteractionTime).getTime();
+                const now = Date.now();
+                const hoursElapsed = (now - lastTime) / (1000 * 60 * 60);
+
+                let newMood: PenguinState['mood'];
+
+                if (hoursElapsed < 3) {
+                    newMood = 'happy';      // 3시간 이내: 행복한 피피
+                } else if (hoursElapsed < 8) {
+                    newMood = 'sad';        // 3-8시간: 조금 외로워...
+                } else if (hoursElapsed < 24) {
+                    newMood = 'hungry';     // 8-24시간: 많이 방치됨
+                } else {
+                    newMood = 'sleeping';   // 24시간+: 완전 방치
+                }
+
+                // 모드가 실제로 바뀌는 경우에만 업데이트 (업데이트 폭풍 방지)
+                if (newMood !== prev.penguin.mood) {
+                    set({ penguin: { ...prev.penguin, mood: newMood } });
+                    // Firestore에도 반영 (주요 변화만 sync)
+                    setTimeout(() => useStore.getState().syncWithFirestore(), 500);
+                }
+            },
             interactWithPipi: () => {
                 const today = new Date().toDateString();
                 const prev = useStore.getState();
@@ -117,10 +177,12 @@ export const useStore = create<AppStore>()(
                 const newXp = prev.penguin.xp + xpGain;
                 let level = prev.penguin.friendshipLevel;
                 let nextXp = prev.penguin.nextLevelXp;
+                let didLevelUp = false;
 
                 if (newXp >= nextXp) {
                     level += 1;
                     nextXp = Math.floor(nextXp * 1.5);
+                    didLevelUp = true; // 🎉 레벨업!
                 }
 
                 set({
@@ -133,7 +195,8 @@ export const useStore = create<AppStore>()(
                         dailyTouchXp: currentDailyXp + xpGain,
                         workoutsCompletedToday: currentWorkoutsToday,
                         lastTouchDate: today,
-                        lastInteractionTime: new Date().toISOString()
+                        lastInteractionTime: new Date().toISOString(),
+                        justLeveledUp: didLevelUp, // 📡 Dashboard에 신호 전달
                     }
                 });
 
@@ -141,7 +204,8 @@ export const useStore = create<AppStore>()(
                 useStore.getState().syncWithFirestore();
             },
             completeWorkout: () => set((prev) => {
-                const program = DAY_1_WORKOUT;
+                // 현재 Day에 맞는 루틴으로 칼로리 계산!
+                const program = getWorkoutForDay(prev.userState.currentDay);
                 let totalCalories = 0;
                 let totalDuration = 0;
 

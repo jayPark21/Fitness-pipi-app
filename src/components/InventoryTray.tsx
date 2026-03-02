@@ -1,11 +1,11 @@
-import { Lock } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { Lock, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import { SHOP_ITEMS, type ShopItem } from '../data/shopItems';
 import { Package } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
-    /** 피피 드롭존의 ref - 여기 위에 놓으면 장착 */
     pipiZoneRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -16,8 +16,9 @@ const GROWTH_STAGES = {
 };
 
 /**
- * 인벤토리 트레이: 소유한 아이템을 보여주고, 드래그해서 피피에 장착!
- * - 알: 장착 불가 / 아기: 기본템만 / 성인: 모두 가능
+ * 인벤토리 트레이
+ * - 탭(짧게 누름): 2초간 아이템 확대 미리보기
+ * - 드래그: 피피 위에 드롭하여 장착
  */
 export default function InventoryTray({ pipiZoneRef }: Props) {
     const { penguin, equipItem } = useStore();
@@ -25,6 +26,12 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
     const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
     const [isOverPipi, setIsOverPipi] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [previewItem, setPreviewItem] = useState<ShopItem | null>(null);
+
+    // 탭 vs 드래그 구분용
+    const pointerDownTime = useRef<number>(0);
+    const pointerDownPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+    const hasMoved = useRef(false);
 
     const level = penguin.friendshipLevel;
     const isEgg = level < 3;
@@ -39,19 +46,16 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
     const getCantEquipReason = (item: ShopItem) => {
         const req = item.requiredLevel || 0;
         if (level >= req) return null;
-
         if (isEgg) return "Eggs can't wear gear! 🐣";
         if (req >= 10) return "Needs Adult Pipi (Lv.10+)! ✨";
         if (req >= 3) return "Needs Baby Pipi (Lv.3+)! 🐥";
         return "Level too low!";
     };
 
-    // 소유한 모든 아이템을 트레이에 표시 (장착 여부와 상관없이)
     const ownedItems = (penguin.ownedItems ?? [])
         .map(id => SHOP_ITEMS.find(i => i.id === id))
         .filter((item): item is ShopItem => !!item);
 
-    // 피피 위에 있는지 체크
     const checkOverPipi = useCallback((clientX: number, clientY: number) => {
         const rect = pipiZoneRef.current?.getBoundingClientRect();
         if (!rect) return false;
@@ -59,12 +63,12 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
             clientY >= rect.top && clientY <= rect.bottom;
     }, [pipiZoneRef]);
 
-    // 글로벌 포인터 이벤트 (드래그 중)
     useEffect(() => {
         if (!draggingItem) return;
 
         const onMove = (e: PointerEvent) => {
             e.preventDefault();
+            hasMoved.current = true;
             setDragPos({ x: e.clientX, y: e.clientY });
             setIsOverPipi(checkOverPipi(e.clientX, e.clientY));
         };
@@ -76,7 +80,6 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
                     setErrorMsg(reason);
                     setTimeout(() => setErrorMsg(null), 2500);
                 } else {
-                    // 🎉 피피 위에 드로! → 장착!
                     equipItem(draggingItem.category, draggingItem.id);
                 }
             }
@@ -86,7 +89,6 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
 
         window.addEventListener('pointermove', onMove, { passive: false });
         window.addEventListener('pointerup', onUp);
-        // 터치 디바이스에서 스크롤 방지
         const preventScroll = (e: TouchEvent) => { if (draggingItem) e.preventDefault(); };
         window.addEventListener('touchmove', preventScroll, { passive: false });
 
@@ -97,17 +99,67 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
         };
     }, [draggingItem, checkOverPipi, equipItem]);
 
-    const handleDragStart = (item: ShopItem, e: React.PointerEvent) => {
+    const handlePointerDown = (item: ShopItem, e: React.PointerEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        pointerDownTime.current = Date.now();
+        pointerDownPos.current = { x: e.clientX, y: e.clientY };
+        hasMoved.current = false;
         setDraggingItem(item);
         setDragPos({ x: e.clientX, y: e.clientY });
+    };
+
+    const handlePointerUp = (item: ShopItem, e: React.PointerEvent) => {
+        const elapsed = Date.now() - pointerDownTime.current;
+        const dx = Math.abs(e.clientX - pointerDownPos.current.x);
+        const dy = Math.abs(e.clientY - pointerDownPos.current.y);
+        const isTap = elapsed < 250 && dx < 8 && dy < 8;
+
+        if (isTap) {
+            // 탭 → 미리보기 2초
+            setDraggingItem(null);
+            setPreviewItem(item);
+            setTimeout(() => setPreviewItem(null), 2000);
+        }
     };
 
     if (ownedItems.length === 0) return null;
 
     return (
         <>
+            {/* 아이템 확대 미리보기 오버레이 (탭 시 2초) */}
+            <AnimatePresence>
+                {previewItem && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        className="fixed inset-0 z-[9998] flex items-center justify-center pointer-events-none"
+                    >
+                        <div className="bg-slate-900/90 backdrop-blur-md border border-white/10 rounded-3xl px-10 py-8 flex flex-col items-center gap-3 shadow-2xl">
+                            <span className="text-8xl">{previewItem.icon}</span>
+                            <p className="text-white font-black text-xl">{previewItem.name}</p>
+                            <p className="text-slate-400 text-xs uppercase tracking-widest">{previewItem.category}</p>
+                            {canEquip(previewItem) ? (
+                                <div className="flex items-center gap-1.5 bg-teal-500/20 px-3 py-1 rounded-full border border-teal-500/30">
+                                    <CheckCircle2 className="w-3 h-3 text-teal-400" />
+                                    <span className="text-teal-400 text-xs font-bold">
+                                        {penguin.equippedItems?.[previewItem.category as keyof typeof penguin.equippedItems] === previewItem.id
+                                            ? 'Equipped ✓'
+                                            : 'Drag to Equip!'}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1.5 bg-slate-700/50 px-3 py-1 rounded-full border border-slate-600">
+                                    <Lock className="w-3 h-3 text-slate-400" />
+                                    <span className="text-slate-400 text-xs font-bold">Lv.{previewItem.requiredLevel} Required</span>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* 인벤토리 트레이 */}
             <div className="mt-4 w-full max-w-xs z-10">
                 <div className="flex items-center justify-between mb-2">
@@ -132,7 +184,8 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
                         return (
                             <div
                                 key={item.id}
-                                onPointerDown={(e) => handleDragStart(item, e)}
+                                onPointerDown={(e) => handlePointerDown(item, e)}
+                                onPointerUp={(e) => handlePointerUp(item, e)}
                                 className={`flex-shrink-0 w-14 h-14 rounded-xl border-2 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing transition-all select-none relative
                                     ${isEquipped
                                         ? 'bg-teal-500/20 border-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.2)]'
@@ -160,14 +213,11 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
                 </div>
             </div>
 
-            {/* 드래그 중 고스트 이미지 (손가락/마우스 따라다니는 아이콘) */}
+            {/* 드래그 중 고스트 이미지 */}
             {draggingItem && (
                 <div
                     className="fixed pointer-events-none z-[9999]"
-                    style={{
-                        left: dragPos.x - 30,
-                        top: dragPos.y - 30,
-                    }}
+                    style={{ left: dragPos.x - 30, top: dragPos.y - 30 }}
                 >
                     <div className={`w-[60px] h-[60px] rounded-2xl flex items-center justify-center text-4xl shadow-2xl transition-all duration-150 ${isOverPipi
                         ? 'bg-teal-500/40 border-2 border-teal-400 scale-[1.3] shadow-[0_0_30px_rgba(20,184,166,0.6)]'
