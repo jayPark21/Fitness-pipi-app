@@ -121,7 +121,7 @@ export const useStore = create<AppStore>()(
             },
             // 피피 기분 자동 변화 시스템 편제하다!
             // lastInteractionTime 기준 경과 시간으로 Mood 자동 업데이트
-            checkAndUpdateMood: () => {
+            checkAndUpdateMood: async () => {
                 const prev = useStore.getState();
                 const lastTime = new Date(prev.penguin.lastInteractionTime).getTime();
                 const now = Date.now();
@@ -142,6 +142,16 @@ export const useStore = create<AppStore>()(
                 // 모드가 실제로 바뀌는 경우에만 업데이트 (업데이트 폭풍 방지)
                 if (newMood !== prev.penguin.mood) {
                     set({ penguin: { ...prev.penguin, mood: newMood } });
+
+                    // 기분이 안 좋아졌을 때만 알림 전송 (happy 이외의 상태로 변할 때)
+                    if (newMood !== 'happy') {
+                        const { sendLocalNotification, MOOD_MESSAGES } = await import('../services/notificationService');
+                        const msg = MOOD_MESSAGES[newMood as keyof typeof MOOD_MESSAGES];
+                        if (msg) {
+                            sendLocalNotification(msg.title, msg.body);
+                        }
+                    }
+
                     // Firestore에도 반영 (주요 변화만 sync)
                     setTimeout(() => useStore.getState().syncWithFirestore(), 500);
                 }

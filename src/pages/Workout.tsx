@@ -5,13 +5,15 @@ import { PlayCircle, PauseCircle, X, CheckCircle2, Info } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { getWorkoutForDay } from '../data/workouts';
 import { videoService } from '../services/videoService';
+import { audioService } from '../services/audioService';
+import { useMemo } from 'react';
 
 export default function Workout() {
     const navigate = useNavigate();
     const { completeWorkout, userState } = useStore();
 
-    // currentDay에 맞는 루틴 자동 선택!
-    const program = getWorkoutForDay(userState.currentDay);
+    // currentDay에 맞는 루틴 자동 선택! (메모이제이션 적용)
+    const program = useMemo(() => getWorkoutForDay(userState.currentDay), [userState.currentDay]);
 
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
     const [timeLeftInStep, setTimeLeftInStep] = useState(program.exercises[0].duration);
@@ -26,13 +28,13 @@ export default function Workout() {
     const [prepTimeLeft, setPrepTimeLeft] = useState(5);
 
     const videoRef = useRef<HTMLVideoElement>(null);
-    const audioContextRef = useRef<AudioContext | null>(null);
     const asmrAudioRef = useRef<HTMLAudioElement | null>(null);
 
     const currentStep = program.exercises[currentExerciseIndex];
 
-    // Initialize audio
+    // Audio initialization (Legacy replaced by audioService)
     useEffect(() => {
+        // ASMR loop focus
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2432/2432-preview.mp3');
         audio.loop = true;
         asmrAudioRef.current = audio;
@@ -45,31 +47,7 @@ export default function Workout() {
         };
     }, []);
 
-    const playTick = (freq: number = 880) => {
-        if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        }
-
-        const ctx = audioContextRef.current;
-        if (ctx.state === 'suspended') {
-            ctx.resume();
-        }
-
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start();
-        osc.stop(ctx.currentTime + 0.1);
-    };
+    // Local playTick logic moved to audioService
 
     const playASMR = () => {
         if (asmrAudioRef.current && asmrAudioRef.current.paused) {
@@ -127,10 +105,10 @@ export default function Workout() {
                     // 준비 시간 카운트다운
                     setPrepTimeLeft(prev => {
                         if (prev > 1) {
-                            playTick(440); // 준비 소리는 더 낮게
+                            audioService.playTick(false);
                             return prev - 1;
                         } else {
-                            playTick(1320); // 시작 소리는 날카롭게!
+                            audioService.playStart();
                             setIsPrepPhase(false);
                             return 0;
                         }
@@ -140,7 +118,7 @@ export default function Workout() {
                     setTimeLeftInStep(prev => {
                         if (prev > 0) {
                             if (!currentStep.isRest) {
-                                playTick();
+                                audioService.playTick(true);
                             }
                             return prev - 1;
                         }
@@ -159,6 +137,7 @@ export default function Workout() {
             } else {
                 setIsPlaying(false);
                 setIsFinished(true);
+                audioService.playMissionClear(); // 보상 사운드
                 completeWorkout();
                 useStore.getState().syncWithFirestore();
             }
@@ -265,6 +244,15 @@ export default function Workout() {
                                             animate={{ x: 0, opacity: 1 }}
                                             className="w-full md:w-1/2 h-full max-h-[300px] md:max-h-none relative rounded-3xl overflow-hidden shadow-2xl border border-white/10"
                                         >
+                                            <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-primary-500/10 pointer-events-none" />
+
+                                            {/* Scanning Line Animation */}
+                                            <motion.div
+                                                className="absolute top-0 left-0 w-full h-[2px] bg-primary-500 shadow-[0_0_15px_rgba(13,185,242,0.8)] z-20"
+                                                animate={{ top: ['0%', '100%', '0%'] }}
+                                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                            />
+
                                             {currentImageUrl ? (
                                                 <img
                                                     src={currentImageUrl}
@@ -276,8 +264,8 @@ export default function Workout() {
                                                     <Info className="w-12 h-12 text-slate-700" />
                                                 </div>
                                             )}
-                                            <div className="absolute top-6 left-6 bg-primary-500 text-slate-950 text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest">
-                                                준비 자세 확인
+                                            <div className="absolute top-6 left-6 bg-primary-500 text-slate-950 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest z-30 shadow-lg">
+                                                BIO-SCANNING POSE
                                             </div>
                                         </motion.div>
 

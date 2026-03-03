@@ -10,9 +10,10 @@ interface Props {
 }
 
 const GROWTH_STAGES = {
-    EGG: { min: 1, max: 2, label: "Egg 🐣" },
-    BABY: { min: 3, max: 9, label: "Baby Pipi 🐥" },
-    ADULT: { min: 10, max: 999, label: "Adult Pipi 🐧" }
+    EGG: { min: 1, max: 2, label: "알 🐣" },
+    BABY: { min: 3, max: 5, label: "아기 피피 🐥" },
+    TEEN: { min: 6, max: 9, label: "청소년 피피 🐧" },
+    ADULT: { min: 10, max: 999, label: "성인 피피 👑" }
 };
 
 /**
@@ -34,9 +35,9 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
     const hasMoved = useRef(false);
 
     const level = penguin.friendshipLevel;
-    const isEgg = level < 3;
-    const isAdult = level >= 10;
-    const isBaby = level >= 3 && level < 10;
+    const isEgg = level <= GROWTH_STAGES.EGG.max;
+    const isBaby = level >= GROWTH_STAGES.BABY.min && level <= GROWTH_STAGES.BABY.max;
+    const isTeen = level >= GROWTH_STAGES.TEEN.min && level <= GROWTH_STAGES.TEEN.max;
 
     const canEquip = (item: ShopItem) => {
         const req = item.requiredLevel || 0;
@@ -46,10 +47,14 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
     const getCantEquipReason = (item: ShopItem) => {
         const req = item.requiredLevel || 0;
         if (level >= req) return null;
-        if (isEgg) return "Eggs can't wear gear! 🐣";
-        if (req >= 10) return "Needs Adult Pipi (Lv.10+)! ✨";
-        if (req >= 3) return "Needs Baby Pipi (Lv.3+)! 🐥";
-        return "Level too low!";
+
+        if (isEgg) return "알 상태에서 장착이라니.. 너 T야? 🐣";
+
+        // 피피 성장 단계별 피드백 (Lv.6 청소년, Lv.10 성인)
+        if (req >= 10 && level < 10) return `성인 피피(Lv.10)는 돼야 이 폼 소화 가능! 👑`;
+        if (req >= 6 && level < 6) return `아직 너무 애기애기해! 청소년(Lv.6) 되면 힙해지자구! 🐧`;
+
+        return `최상의 핏을 위해 Lv.${req} 찍고 갓생 템 장착 가보자고! 🚀`;
     };
 
     const ownedItems = (penguin.ownedItems ?? [])
@@ -78,7 +83,7 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
                 const reason = getCantEquipReason(draggingItem);
                 if (reason) {
                     setErrorMsg(reason);
-                    setTimeout(() => setErrorMsg(null), 2500);
+                    setTimeout(() => setErrorMsg(null), 3000);
                 } else {
                     equipItem(draggingItem.category, draggingItem.id);
                 }
@@ -145,14 +150,14 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
                                     <CheckCircle2 className="w-3 h-3 text-teal-400" />
                                     <span className="text-teal-400 text-xs font-bold">
                                         {penguin.equippedItems?.[previewItem.category as keyof typeof penguin.equippedItems] === previewItem.id
-                                            ? 'Equipped ✓'
-                                            : 'Drag to Equip!'}
+                                            ? '이미 장착 중! ✓'
+                                            : '드래그해서 장착!'}
                                     </span>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1.5 bg-slate-700/50 px-3 py-1 rounded-full border border-slate-600">
                                     <Lock className="w-3 h-3 text-slate-400" />
-                                    <span className="text-slate-400 text-xs font-bold">Lv.{previewItem.requiredLevel} Required</span>
+                                    <span className="text-slate-400 text-xs font-bold">{previewItem.requiredLevel}레벨부터 갓생 템 장착 가능!</span>
                                 </div>
                             )}
                         </div>
@@ -166,17 +171,46 @@ export default function InventoryTray({ pipiZoneRef }: Props) {
                     <div className="flex items-center gap-2">
                         <Package className="w-3.5 h-3.5 text-slate-500" />
                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            {errorMsg ? (
-                                <span className="text-red-400 animate-pulse">{errorMsg}</span>
-                            ) : (
-                                isEgg ? GROWTH_STAGES.EGG.label :
-                                    isBaby ? GROWTH_STAGES.BABY.label :
-                                        GROWTH_STAGES.ADULT.label
-                            )}
+                            {isEgg ? GROWTH_STAGES.EGG.label :
+                                isBaby ? GROWTH_STAGES.BABY.label :
+                                    isTeen ? GROWTH_STAGES.TEEN.label :
+                                        GROWTH_STAGES.ADULT.label}
                         </span>
                     </div>
-                    {(isEgg || isBaby) && !isAdult && <Lock className="w-3 h-3 text-slate-600" />}
+                    {(isEgg || isBaby) && <Lock className="w-3 h-3 text-slate-600" />}
                 </div>
+
+                {/* MZ 스타일 절제된 중앙 경고 레이어 */}
+                <AnimatePresence>
+                    {errorMsg && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md pointer-events-none"
+                        >
+                            <motion.div
+                                initial={{ scale: 0.8, y: 20 }}
+                                animate={{
+                                    scale: 1,
+                                    y: 0,
+                                    x: [0, -10, 10, -10, 10, 0] // Shake animation
+                                }}
+                                exit={{ scale: 0.8, opacity: 0 }}
+                                transition={{ type: "spring", duration: 0.5 }}
+                                className="flex flex-col items-center gap-4 text-center"
+                            >
+                                <div className="text-6xl mb-2">🔒</div>
+                                <h3 className="text-white font-black text-3xl tracking-tighter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                                    {errorMsg}
+                                </h3>
+                                <p className="text-teal-400 font-bold text-sm uppercase tracking-[0.3em] animate-pulse">
+                                    Level Up Required 🐧
+                                </p>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
                     {ownedItems.map(item => {
                         const isEquipped = penguin.equippedItems?.[item.category as keyof typeof penguin.equippedItems] === item.id;

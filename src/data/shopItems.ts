@@ -17,16 +17,7 @@ export const SHOP_ITEMS: ShopItem[] = [
         price: 200,
         icon: '🧢',
         description: 'Cool blue cap for comfortable training.',
-        requiredLevel: 10
-    },
-    {
-        id: 'crown-gold',
-        name: 'King of Cardio',
-        category: 'hat',
-        price: 2000,
-        icon: '👑',
-        description: 'Only for those who have conquered the peak.',
-        requiredLevel: 10
+        requiredLevel: 6 // Teen
     },
     {
         id: 'ninja-band',
@@ -35,7 +26,16 @@ export const SHOP_ITEMS: ShopItem[] = [
         price: 500,
         icon: '🥷',
         description: 'Silence your excuses.',
-        requiredLevel: 10
+        requiredLevel: 8 // Late Teen
+    },
+    {
+        id: 'crown-gold',
+        name: 'King of Cardio',
+        category: 'hat',
+        price: 2000,
+        icon: '👑',
+        description: 'Only for those who have conquered the peak.',
+        requiredLevel: 10 // Adult
     },
 
     // GLASSES
@@ -46,7 +46,7 @@ export const SHOP_ITEMS: ShopItem[] = [
         price: 400,
         icon: '🕶️',
         description: 'Look cool while burning calories.',
-        requiredLevel: 10
+        requiredLevel: 6 // Teen
     },
     {
         id: 'monocle-fancy',
@@ -55,19 +55,19 @@ export const SHOP_ITEMS: ShopItem[] = [
         price: 800,
         icon: '🧐',
         description: 'Analyze every muscle fiber.',
-        requiredLevel: 10
+        requiredLevel: 10 // Adult
+    },
+    {
+        id: 'vr-goggles',
+        name: 'VR Trainer',
+        category: 'glasses',
+        price: 1000,
+        icon: '🥽',
+        description: 'Workout in the metaverse.',
+        requiredLevel: 10 // Adult
     },
 
     // ACCESSORIES
-    {
-        id: 'medal-gold',
-        name: 'Gold Medal',
-        category: 'accessory',
-        price: 1500,
-        icon: '🥇',
-        description: 'You are a champion.',
-        requiredLevel: 3
-    },
     {
         id: 'dumbbell',
         name: 'Mini Dumbbell',
@@ -75,26 +75,59 @@ export const SHOP_ITEMS: ShopItem[] = [
         price: 300,
         icon: '🏋️',
         description: 'Pipi also wants to lift.',
-        requiredLevel: 3
+        requiredLevel: 6 // Teen
+    },
+    {
+        id: 'medal-gold',
+        name: 'Gold Medal',
+        category: 'accessory',
+        price: 1500,
+        icon: '🥇',
+        description: 'You are a champion.',
+        requiredLevel: 8 // Late Teen
+    },
+    {
+        id: 'water-bottle',
+        name: 'Crystal Clear',
+        category: 'accessory',
+        price: 100,
+        icon: '🧪',
+        description: 'Stay hydrated with premium filtered water.',
+    },
+    {
+        id: 'running-shoes',
+        name: 'Aero Runners',
+        category: 'accessory',
+        price: 800,
+        icon: '👟',
+        description: 'Run faster, jump higher.',
+        requiredLevel: 6 // Teen
+    },
+    {
+        id: 'dumbbell-gold',
+        name: 'Golden Weight',
+        category: 'accessory',
+        price: 5000,
+        icon: '🏋️',
+        description: 'Pure luxury for your training routine.',
+        requiredLevel: 10 // Adult
     },
 
     // BACKGROUNDS
     {
         id: 'bg-gym',
-        name: 'Iron Temple',
+        name: 'Hardcore Gym',
         category: 'background',
-        price: 1000,
-        icon: '🏢',
-        description: 'The classic gym vibe.',
-        requiredLevel: 10
+        price: 1500,
+        icon: '🏟️',
+        description: 'The home of real gainz.',
     },
     {
         id: 'bg-beach',
-        name: 'Summer Shore',
+        name: 'Sunset Beach',
         category: 'background',
-        price: 1200,
+        price: 3000,
         icon: '🏖️',
-        description: 'Workout with a sea breeze.',
-        requiredLevel: 10
+        description: 'Relax after a legendary workout.',
     }
 ];

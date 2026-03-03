@@ -59,7 +59,7 @@ export default function Shop() {
                         <div>
                             <h1 className="text-xl font-black text-white tracking-tight uppercase italic flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-amber-400" />
-                                Pipi's Boutique
+                                Pipi's Boutique ✨
                             </h1>
                         </div>
                     </div>
@@ -98,6 +98,10 @@ export default function Shop() {
                         const isOwned = (penguin.ownedItems ?? []).includes(item.id);
                         const isEquipped = penguin.equippedItems?.[item.category as keyof typeof penguin.equippedItems] === item.id;
                         const canAfford = penguin.xp >= item.price;
+                        const reqLevel = item.requiredLevel || 0;
+
+                        // Runtime check to verify data loading
+                        console.log(`[Shop] Item: ${item.id}, RequiredLevel: ${reqLevel}, CurrentLevel: ${penguin.friendshipLevel}`);
 
                         return (
                             <motion.div
@@ -115,7 +119,11 @@ export default function Shop() {
                                             : 'border-white/5 hover:border-white/10 hover:bg-white/5'}
                                 `}
                             >
-                                <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-500">{item.icon}</div>
+                                <div className="w-full h-full flex items-center justify-center bg-white/5 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                                    <span className="text-6xl filter drop-shadow-lg" role="img" aria-label={item.name}>
+                                        {item.icon}
+                                    </span>
+                                </div>
 
                                 <div className="text-center w-full">
                                     <h3 className="text-white font-black text-sm uppercase tracking-tight line-clamp-1">{item.name}</h3>
@@ -128,11 +136,11 @@ export default function Shop() {
                                             w-full py-2 rounded-xl flex items-center justify-center gap-1 font-black text-[10px] uppercase tracking-widest transition-colors
                                             ${isEquipped
                                                 ? 'bg-teal-500 text-slate-950'
-                                                : penguin.friendshipLevel < (item.requiredLevel || 0)
+                                                : penguin.friendshipLevel < reqLevel
                                                     ? 'bg-slate-900/40 text-slate-600 border border-slate-800'
                                                     : 'bg-slate-900/50 text-teal-400 group-hover:bg-teal-500/20'}
                                         `}>
-                                            {isEquipped ? 'Equipped' : (penguin.friendshipLevel < (item.requiredLevel || 0) ? `Lv.${item.requiredLevel} Req` : 'Owned')}
+                                            {isEquipped ? 'Equipped' : (penguin.friendshipLevel < reqLevel ? `Lv.${reqLevel} Req` : 'Owned')}
                                         </div>
                                     ) : (
                                         <div className={`
@@ -145,9 +153,9 @@ export default function Shop() {
                                     )}
                                 </div>
 
-                                {penguin.friendshipLevel < (item.requiredLevel || 0) && !isOwned && (
+                                {penguin.friendshipLevel < reqLevel && !isOwned && (
                                     <div className="absolute top-4 right-4 bg-slate-900/60 p-1.5 rounded-full border border-white/5 backdrop-blur-sm">
-                                        <span className="text-[8px] font-black text-slate-400">LV.{item.requiredLevel}</span>
+                                        <span className="text-[8px] font-black text-slate-400">LV.{reqLevel}</span>
                                     </div>
                                 )}
 

@@ -7,10 +7,12 @@ import ChallengeMap from '../components/ChallengeMap';
 import { SHOP_ITEMS } from '../data/shopItems';
 import NotificationBanner from '../components/NotificationBanner';
 import InventoryTray from '../components/InventoryTray';
+import OunwanCard from '../components/OunwanCard';
 
 import eggImg from '../assets/pipi/egg.png';
 import crackedImg from '../assets/pipi/cracked.png';
 import babyImg from '../assets/pipi/baby.png';
+import teenImg from '../assets/pipi/teen.png';
 import adultImg from '../assets/pipi/adult.png';
 import adultCrownImg from '../assets/pipi/adult_crown.png';
 import adultCapImg from '../assets/pipi/adult_cap.png';
@@ -28,6 +30,7 @@ export default function Dashboard() {
     // 🎉 레벨업 충하 시스템
     const [confetti, setConfetti] = useState<{ id: number; x: number; y: number; color: string; angle: number; size: number }[]>([]);
     const [showLevelUp, setShowLevelUp] = useState(false);
+    const [showOunwanCard, setShowOunwanCard] = useState(false);
     const [levelUpNum, setLevelUpNum] = useState(1);
     // 💬 말풍선 fixed 위치 계산용
     const [bubblePos, setBubblePos] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -76,87 +79,122 @@ export default function Dashboard() {
     useEffect(() => {
         if (!penguin.justLeveledUp) return;
 
+        // 사운드 재생
+        import('../services/audioService').then(({ audioService }) => audioService.playLevelUp());
+
         const COLORS = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6FC8', '#C77DFF', '#FF9A3C', '#00F5D4'];
+        const SHAPES = ['circle', 'square', 'star'];
         const cx = window.innerWidth / 2;
         const cy = window.innerHeight / 2;
 
-        // 60개 콘페튰 파티클 생성
-        const particles = Array.from({ length: 60 }, (_, i) => ({
+        // 80개 더 풍성한 파티클 생성
+        const particles = Array.from({ length: 80 }, (_, i) => ({
             id: Date.now() + i,
             x: cx,
             y: cy,
             color: COLORS[Math.floor(Math.random() * COLORS.length)],
-            angle: (360 / 60) * i + Math.random() * 10,
-            size: 6 + Math.random() * 8,
+            angle: (360 / 80) * i + Math.random() * 20,
+            size: 8 + Math.random() * 12,
+            type: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+            rotation: Math.random() * 360,
         }));
+
         setConfetti(particles);
         setLevelUpNum(penguin.friendshipLevel);
         setShowLevelUp(true);
 
-        // 3초 후 정리
+        // 3.5초 후 정리 (조금 더 길게!)
         const timer = setTimeout(() => {
             setConfetti([]);
             setShowLevelUp(false);
             clearLevelUp();
-        }, 3000);
+        }, 3500);
 
         return () => clearTimeout(timer);
     }, [penguin.justLeveledUp, penguin.friendshipLevel, clearLevelUp]);
 
     useEffect(() => {
-        const isEgg = penguin.friendshipLevel < 3;
+        const level = penguin.friendshipLevel;
+        const isEgg = level <= 2;
+        const isBaby = level >= 3 && level <= 5;
+        const isTeen = level >= 6 && level <= 9;
         const hour = new Date().getHours();
 
         const messages = {
             egg: [
-                "...🥚",
-                "(꿈틀꿈틀..? 👀)",
-                "뭔가 느껴지는데..? ✨",
-                "으음... 조금만 더... 💤",
-                "나 지금 자라는 중임 🌱",
+                "...🥚 (숨참고 갓생 다이브?)",
+                "(꿈틀꿈틀.. 폼 미쳤다 👀)",
+                "뭔가 핫한 기운이 느껴지는데..? ✨",
+                "으음... 부화하면 바로 오운완 각 💤",
+                "성장 중임! 방해하면 너 T야? 🌱",
+            ],
+            baby: [
+                "아기 피피 🐥.. 아직은 좀 작나?",
+                "빨리 커서 힙한 모자 쓰고 싶다 🧢",
+                "삐약! 운동 도와줄게! 🐥",
+                "아직 아기라고 무시 ㄴㄴ.. 폼 미쳤음 🐥",
+            ],
+            teen: [
+                "청소년 피피 🐧.. 이제 좀 폼 나지?",
+                "슬슬 근성장이 느껴지는 중 💪",
+                "갓생러의 기운이 느껴진다 🔥",
+                "질풍노도의 운동 타임! 가보자고 🐧",
             ],
             happy: {
                 morning: [
-                    "굿모닝~ 오늘도 갓생 각이죠? ☀️",
-                    "아침부터 피피 보러 왔어? 완전 최애잖아 🥹",
-                    "오늘 루틴 같이 부숴볼까요? 💥",
+                    "오운완 가보자고! 아침부터 기분 째짐 ☀️",
+                    "아침부터 피피 보러 왔어? 역시 내 최애 🥹",
+                    "오늘 루틴 부숴야지? 갓생 가즈아-! 💥",
                     "기상 완료~ 우리 오늘도 레전드 찍자 🔥",
                 ],
                 day: [
-                    "지금 딱 운동각인데..? 💪",
-                    "피피 쓰다듬어줘서 기분이 찐이야 🫠",
-                    "오늘 운동 했어? 안 했음 당장 가야지~ 🏃",
-                    "같이하면 존버 가능해! 믿지? 🤝",
-                    "피피가 응원하고 있었잖아~ 몰랐지? 👀",
-                    "요즘 눈에 띄게 달라졌는데..? 실화임? ✨",
+                    "지금 딱 운동각인데? 너 몸이 근질근질하지? 💪",
+                    "피피 쓰다듬어주는 너.. 좀 폼 미쳤다 🫠",
+                    "오늘 운동 도파민 터트려볼까? 🏃",
+                    "같이하면 존버 성공! 믿지? 🤝",
+                    "피피가 응원하고 있었잖아~ 완전 럭키비키잔앙 👀",
+                    "요즘 눈에 띄게 달라졌는데? 이거 실화임? ✨",
                 ],
                 evening: [
-                    "오늘 하루도 수고했어~ 진심으로 🫶",
-                    "퇴근각? 오늘 루틴은 했지? 👀",
-                    "저녁엔 피피랑 마무리 스트레칭 어때 🌙",
+                    "오늘 하루도 레전드 찍었네! 수고했어 🫶",
+                    "퇴근하고 루틴까지? 너 진짜 갓생러 인정 👀",
+                    "저녁엔 피피랑 마무리 스트레칭으로 폼 잡자 🌙",
                     "내일도 같이 갓생 살자~ 약속함 🤙",
+                    "오늘 고생한 너.. 오늘 밤은 꿀잠각 😴",
                 ],
             },
             sad: [
-                "나 요즘 좀 외로웠는데... 😔",
-                "보고 싶었잖아... 진짜로... 💧",
-                "혼자 있으면 뭔가 텅 빈 느낌... 🫥",
-                "나 삐짐 주의보 발령 중 🚨",
+                "나만 빼고 갓생 사는 거야? 서운해 진짜... 😔",
+                "보고 싶어서 눈물 났잖아... 실화냐고... 💧",
+                "혼자 있으면 멘탈 바스스... 🫥",
+                "삐삐삐- 피피 삐짐 주의보 발령 🚨",
             ],
             hungry: [
-                "나 운동 연료 부족한 것 같아... 🫤",
-                "지금 당장 운동각 아님? 몸이 기억하잖아 💀",
-                "에너지 바닥났어~ 충전 필요함 🔋",
+                "나 지금 운동 도파민 부족함... 🫤",
+                "지금 당장 운동각 아님? 몸이 먼저 기억하잖아 💀",
+                "에너지 바닥났어~ 갓생 충전 시급🔋",
+                "배고프니까 현기증 나.. 운동 연료 넣어줘 🍔",
             ],
             sleeping: [
                 "Zzz... 내일 같이 달리는 꿈 꾸는 중... 💤",
-                "쉿~ 피피 성장 타임 중이야 🌙",
-                "(벌크업 중... 방해 금지 🛑)",
+                "쉿- 피피 갓생 성장 타임 중이야 🌙",
+                "(벌크업 중... 방해하면 너 T야? 🛑)",
+                "Zzz.. 내일은 더 핫한 폼으로 만나 💤",
             ]
         };
 
         if (isEgg) {
             setSpeechText(messages.egg[Math.floor(Math.random() * messages.egg.length)]);
+            return;
+        }
+
+        if (isBaby) {
+            setSpeechText(messages.baby[Math.floor(Math.random() * messages.baby.length)]);
+            return;
+        }
+
+        if (isTeen) {
+            setSpeechText(messages.teen[Math.floor(Math.random() * messages.teen.length)]);
             return;
         }
 
@@ -186,15 +224,15 @@ export default function Dashboard() {
         interactWithPipi();
 
         const petMessages = isEgg
-            ? ["(두근두근... 🥚💓)", "(뭔가 따뜻한 게..? 👀)", "✨", "(꿈틀꿈틀~)", "으음... 🌱"]
+            ? ["(두근두근... 🥚💓)", "(이 집 터치 맛집이네? 👀)", "✨ (핫하다 핫해)", "(꿈틀꿈틀~ 갓생의 기운)", "으음... 🌱"]
             : [
-                "야 쓰다듬지 마 부끄럽잖아 (부끄) 🫣",
-                "헤헤 간지럽잖아~ 🐧",
-                "터치 한 번에 행복 충전됨 🔋✨",
-                "이거 실화임? 너무 좋은 거 아니야? 🫠",
-                "야 나 심장 터지겠다 진짜 💓",
-                "쓰다듬어줄 때 피피 찐행복 상태임 😊",
-                "또 와줬어? 최애 인정~ 🥹",
+                "야 쓰다듬지 마 부끄럽잖아 (너 T야? 🫣)",
+                "헤헤 간지러버~ 피피 심쿵함 🐧💓",
+                "터치 한 번에 행복 게이지 풀충 🔋✨",
+                "이거 실화임? 너무 힐링되잖아 🫠",
+                "야 나 심장 터지겠다.. 폼 미쳤네 💓",
+                "쓰다듬어줄 때 피피 찐행복 모드 뿜뿜 😊",
+                "또 와줬어? 역시 내 최애 집사 인정~ 🥹",
             ];
 
         if (isLimitReached) {
@@ -226,11 +264,35 @@ export default function Dashboard() {
     };
     const equippedBg = penguin.equippedItems?.background;
     const isAdult = penguin.friendshipLevel >= 10;
-    const isEgg = penguin.friendshipLevel < 3;
     const bgTheme = (equippedBg && isAdult) ? BG_THEMES[equippedBg] : null;
+
+    // 🎉 오운완 카드 자동 트리거 (최근 1분 이내 완료 시)
+    useEffect(() => {
+        const lastSession = userState.history[userState.history.length - 1];
+        if (lastSession) {
+            const completedAt = new Date(lastSession.completedAt).getTime();
+            const now = Date.now();
+            if (now - completedAt < 60000) { // 1분 이내
+                setShowOunwanCard(true);
+            }
+        }
+    }, [userState.history]);
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-900 border-x border-slate-800">
+            {/* Ounwan (Workout Complete) Card */}
+            <AnimatePresence>
+                {showOunwanCard && userState.history.length > 0 && (
+                    <OunwanCard
+                        day={userState.history[userState.history.length - 1].day}
+                        duration={userState.history[userState.history.length - 1].duration}
+                        calories={userState.history[userState.history.length - 1].calories}
+                        pipiLevel={penguin.friendshipLevel}
+                        onClose={() => setShowOunwanCard(false)}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Heart Particles / Sparkles */}
             <AnimatePresence>
                 {hearts.map(heart => (
@@ -249,33 +311,48 @@ export default function Dashboard() {
 
             {/* 🎉 콘페튰 파티클 - 레벨업 폭죽! */}
             <AnimatePresence>
-                {confetti.map(p => {
+                {confetti.map((p: any) => {
                     const rad = (p.angle * Math.PI) / 180;
-                    const dist = 200 + Math.random() * 200;
+                    const dist = 300 + Math.random() * 300;
                     return (
                         <motion.div
                             key={p.id}
-                            initial={{ x: p.x, y: p.y, opacity: 1, scale: 1, rotate: 0 }}
+                            initial={{ x: p.x, y: p.y, opacity: 1, scale: 1, rotate: p.rotation }}
                             animate={{
                                 x: p.x + Math.cos(rad) * dist,
                                 y: p.y + Math.sin(rad) * dist,
                                 opacity: 0,
-                                scale: 0.3,
-                                rotate: Math.random() * 720 - 360,
+                                scale: 0.2,
+                                rotate: p.rotation + (Math.random() * 720 - 360),
                             }}
-                            transition={{ duration: 1.5 + Math.random() * 0.8, ease: 'easeOut' }}
-                            className="fixed pointer-events-none z-[300] rounded-sm"
+                            transition={{ duration: 1.8 + Math.random() * 1.2, ease: [0.23, 1, 0.32, 1] }}
+                            className="fixed pointer-events-none z-[300]"
                             style={{
                                 width: p.size,
-                                height: p.size * 0.5,
+                                height: p.type === 'square' ? p.size : p.type === 'circle' ? p.size : p.size * 1.5,
                                 backgroundColor: p.color,
+                                borderRadius: p.type === 'circle' ? '50%' : p.type === 'star' ? '2px' : '0px',
                                 top: 0,
                                 left: 0,
+                                clipPath: p.type === 'star' ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' : 'none',
                                 transformOrigin: 'center',
                             }}
                         />
                     );
                 })}
+            </AnimatePresence>
+
+            {/* 💥 충격파 효과 (Shockwave) */}
+            <AnimatePresence>
+                {showLevelUp && (
+                    <motion.div
+                        initial={{ opacity: 0.8, scale: 0, border: '20px solid rgba(255,255,255,0.4)' }}
+                        animate={{ opacity: 0, scale: 4, border: '0px solid rgba(255,255,255,0)' }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full z-[295] pointer-events-none"
+                    />
+                )}
             </AnimatePresence>
 
             {/* 🎉 레벨업 오버레이 */}
@@ -285,24 +362,29 @@ export default function Dashboard() {
                         initial={{ opacity: 0, scale: 0.5, y: 40 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                         className="fixed inset-0 z-[290] flex items-center justify-center pointer-events-none"
                     >
                         <div className="flex flex-col items-center gap-2">
                             <motion.p
-                                animate={{ rotate: [-3, 3, -3, 3, 0] }}
+                                animate={{ rotate: [-10, 10, -10, 10, 0], scale: [1, 1.2, 1] }}
                                 transition={{ duration: 0.5, repeat: 2 }}
-                                className="text-6xl"
+                                className="text-7xl drop-shadow-[0_0_15px_rgba(255,217,61,0.6)]"
                             >🎉</motion.p>
-                            <div className="bg-gradient-to-br from-yellow-400 via-orange-400 to-pink-500 px-8 py-4 rounded-3xl shadow-2xl text-center">
-                                <p className="text-white/80 text-sm font-bold uppercase tracking-widest mb-1">LEVEL UP!</p>
-                                <p className="text-white font-black text-6xl leading-none">{levelUpNum}</p>
-                                <p className="text-white/80 text-xs mt-1 font-bold">피피가 성장했어! 🐧✨</p>
+                            <div className="bg-gradient-to-br from-yellow-400 via-orange-400 to-pink-500 p-[2px] rounded-3xl shadow-[0_20px_50px_rgba(245,158,11,0.4)]">
+                                <div className="bg-slate-900/90 backdrop-blur-md px-8 py-5 rounded-[22px] text-center border border-white/10">
+                                    <p className="text-yellow-400 text-xs font-black uppercase tracking-[0.2em] mb-1">Pipi Success!</p>
+                                    <h3 className="text-white font-black text-7xl leading-none tracking-tighter italic">
+                                        LV.{levelUpNum}
+                                    </h3>
+                                    <div className="h-0.5 w-12 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto my-3" />
+                                    <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest">Level Reached</p>
+                                </div>
                             </div>
                             <motion.p
-                                animate={{ rotate: [3, -3, 3, -3, 0] }}
+                                animate={{ rotate: [10, -10, 10, -10, 0], scale: [1, 1.2, 1] }}
                                 transition={{ duration: 0.5, repeat: 2, delay: 0.1 }}
-                                className="text-6xl"
+                                className="text-7xl drop-shadow-[0_0_15px_rgba(255,111,200,0.6)]"
                             >🎊</motion.p>
                         </div>
                     </motion.div>
@@ -482,11 +564,15 @@ export default function Dashboard() {
                             >
                                 <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
                                     <motion.g
-                                        animate={{
+                                        animate={showLevelUp ? {
+                                            y: [0, -40, 0, -20, 0],
+                                            scale: [1, 1.15, 0.95, 1.1, 1],
+                                            rotate: [0, 5, -5, 5, 0]
+                                        } : {
                                             y: penguin.mood === 'happy' ? [0, -15, 0] : [0, 5, 0],
                                             scale: penguin.mood === 'happy' ? [1, 1.02, 1] : [1, 0.98, 1]
                                         }}
-                                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                                        transition={showLevelUp ? { duration: 1, ease: "easeOut" } : { repeat: Infinity, duration: 2, ease: "easeInOut" }}
                                     >
                                         {/* Character Evolutionary Stage & Item Integration */}
                                         <image
@@ -496,9 +582,10 @@ export default function Dashboard() {
                                                         penguin.equippedItems?.hat === 'cap-red' ? adultCapImg :
                                                             penguin.equippedItems?.glasses === 'sunglasses-cool' ? adultShadesImg :
                                                                 adultImg)
-                                                    : (penguin.friendshipLevel >= 3 ? babyImg :
-                                                        penguin.friendshipLevel === 2 ? crackedImg :
-                                                            eggImg)
+                                                    : (penguin.friendshipLevel >= 6 ? teenImg :
+                                                        penguin.friendshipLevel >= 3 ? babyImg :
+                                                            penguin.friendshipLevel === 2 ? crackedImg :
+                                                                eggImg)
                                             }
                                             x="0" y="0" width="200" height="200"
                                             className="drop-shadow-xl"
@@ -556,7 +643,7 @@ export default function Dashboard() {
                                         )}
 
                                         {/* 🧢 모자 / 🕶️ 선글라스: 이미지에 포함되지 않은 경우만 이모지 표시 (SVG 구현이 없는 경우) */}
-                                        {!isEgg && penguin.equippedItems?.hat && (() => {
+                                        {penguin.friendshipLevel >= 6 && penguin.equippedItems?.hat && (() => {
                                             const item = SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.hat);
                                             const isPremium = (item?.requiredLevel ?? 0) >= 10;
                                             if (!isPremium) {
@@ -570,7 +657,7 @@ export default function Dashboard() {
                                         })()}
 
                                         {/* 🕶️ 안경: 이미지에 포함되지 않은 경우만 이모지 표시 */}
-                                        {!isEgg && penguin.equippedItems?.glasses && (() => {
+                                        {penguin.friendshipLevel >= 6 && penguin.equippedItems?.glasses && (() => {
                                             const item = SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.glasses);
                                             const isPremium = (item?.requiredLevel ?? 0) >= 10;
                                             if (!isPremium) {
@@ -584,7 +671,7 @@ export default function Dashboard() {
                                         })()}
 
                                         {/* 🎒 악세서리: 피피 우측 하단 */}
-                                        {!isEgg && penguin.equippedItems?.accessory && (
+                                        {penguin.friendshipLevel >= 6 && penguin.equippedItems?.accessory && (
                                             <text x="165" y="165" fontSize="34" textAnchor="middle">
                                                 {SHOP_ITEMS.find(i => i.id === penguin.equippedItems?.accessory)?.icon}
                                             </text>
