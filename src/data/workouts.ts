@@ -49,7 +49,7 @@ export const DAY_1_WORKOUT: WorkoutProgram = {
         rest(2),
         { id: "d1-3", name: "Plank Hold", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "plank exercise core hold", met: 3.5 },
         rest(3),
-        { id: "d1-4", name: "Mountain Climbers", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "mountain climbers exercise fitness", met: 8.0 },
+        { id: "d1-4", name: "Mountain Climbers", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "mountain climber floor exercise ab", met: 8.0 },
     ]
 };
 
@@ -186,7 +186,7 @@ const DAY_10_WORKOUT: WorkoutProgram = {
         rest(1),
         { id: "d10-2", name: "Jumping Jacks (Fast)", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "jumping jacks fast cardio workout", met: 8.5 },
         rest(2),
-        { id: "d10-3", name: "Mountain Climbers (Fast)", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "mountain climber fast HIIT cardio", met: 9.0 },
+        { id: "d10-3", name: "Mountain Climbers (Fast)", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "mountain climber floor exercise fast ab", met: 9.0 },
         rest(3),
         { id: "d10-4", name: "Lateral Shuffles", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "lateral shuffle exercise agility cardio", met: 8.5 },
     ]
@@ -265,7 +265,7 @@ const DAY_15_WORKOUT: WorkoutProgram = {
         restLong(1),
         { id: "d15-2", name: "Squat Jumps", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "squat jump plyometric exercise power", met: 9.5 },
         restLong(2),
-        { id: "d15-3", name: "Mountain Climbers", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "mountain climbers fast HIIT exercise", met: 9.0 },
+        { id: "d15-3", name: "Mountain Climbers", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "mountain climber floor exercise ab", met: 9.0 },
         restLong(3),
         { id: "d15-4", name: "High Knees Sprint", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "high knees sprint fast cardio HIIT", met: 10.0 },
     ]
@@ -321,7 +321,7 @@ const DAY_19_WORKOUT: WorkoutProgram = {
     title: "Day 19 · Core + HIIT",
     description: "Shred your core while your heart rate stays elevated.",
     exercises: [
-        { id: "d19-1", name: "Mountain Climbers", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "mountain climbers core HIIT cardio", met: 9.0 },
+        { id: "d19-1", name: "Mountain Climbers", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "mountain climber floor exercise ab", met: 9.0 },
         restLong(1),
         { id: "d19-2", name: "Bicycle Crunches", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "bicycle crunches abs core exercise", met: 5.0 },
         restLong(2),
@@ -342,7 +342,7 @@ const DAY_20_WORKOUT: WorkoutProgram = {
         restLong(2),
         { id: "d20-3", name: "Jump Squats", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "jump squat explosive legs power", met: 9.5 },
         restLong(3),
-        { id: "d20-4", name: "Mountain Climbers", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "mountain climbers fast HIIT core", met: 9.0 },
+        { id: "d20-4", name: "Mountain Climbers", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "mountain climber floor exercise ab", met: 9.0 },
     ]
 };
 
