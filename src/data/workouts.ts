@@ -1,3 +1,13 @@
+// ── 자세 안내 이미지 임포트 ──────────────────────────────
+import squatImg from "../assets/poses/squat.png";
+import pushupImg from "../assets/poses/pushup.png";
+import plankImg from "../assets/poses/plank.png";
+import lungeImg from "../assets/poses/lunge.png";
+import mountainImg from "../assets/poses/mountain_climber.png";
+import burpeeImg from "../assets/poses/burpee.png";
+import bridgeImg from "../assets/poses/bridge.png";
+import jumpingImg from "../assets/poses/jumping_jacks.png";
+
 export interface WorkoutExercise {
     id: string;
     name: string;
@@ -48,9 +58,9 @@ export const DAY_1_WORKOUT: WorkoutProgram = {
         rest(1),
         { id: "d1-2", name: "바이시클 크런치", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "bicycle crunches ab exercise", met: 5.0 },
         rest(2),
-        { id: "d1-3", name: "플랭크 홀드", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "plank exercise core hold", met: 3.5 },
+        { id: "d1-3", name: "플랭크 홀드", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "plank exercise core hold", met: 3.5, poseGuideUrl: plankImg },
         rest(3),
-        { id: "d1-4", name: "마운틴 클라이머", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "mountain climber floor exercise ab", met: 8.0 },
+        { id: "d1-4", name: "마운틴 클라이머", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "mountain climber floor exercise ab", met: 8.0, poseGuideUrl: mountainImg },
     ]
 };
 
@@ -59,11 +69,11 @@ const DAY_2_WORKOUT: WorkoutProgram = {
     title: "2일차 · 하체 활성화",
     description: "차분한 동작으로 둔근과 허벅지 근육을 깨웁니다.",
     exercises: [
-        { id: "d2-1", name: "맨몸 스쿼트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "bodyweight squat exercise beginner", met: 5.0 },
+        { id: "d2-1", name: "맨몸 스쿼트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "bodyweight squat exercise beginner", met: 5.0, poseGuideUrl: squatImg },
         rest(1),
-        { id: "d2-2", name: "글루트 브릿지", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "glute bridge exercise floor", met: 4.5 },
+        { id: "d2-2", name: "글루트 브릿지", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "glute bridge exercise floor", met: 4.5, poseGuideUrl: bridgeImg },
         rest(2),
-        { id: "d2-3", name: "리버스 런지", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "reverse lunge exercise legs", met: 5.5 },
+        { id: "d2-3", name: "리버스 런지", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "reverse lunge exercise legs", met: 5.5, poseGuideUrl: lungeImg },
         rest(3),
         { id: "d2-4", name: "월 싯 (버티기)", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "wall sit exercise legs isometric", met: 4.0 },
     ]
@@ -76,7 +86,7 @@ const DAY_3_WORKOUT: WorkoutProgram = {
     exercises: [
         { id: "d3-1", name: "인클라인 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "incline push up exercise beginner", met: 4.5 },
         rest(1),
-        { id: "d3-2", name: "스탠다드 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "push up exercise chest", met: 6.5 },
+        { id: "d3-2", name: "스탠다드 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "push up exercise chest", met: 6.5, poseGuideUrl: pushupImg },
         rest(2),
         { id: "d3-3", name: "의자 트라이셉 딥스", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "tricep dips chair exercise", met: 5.0 },
         rest(3),
@@ -89,7 +99,7 @@ const DAY_4_WORKOUT: WorkoutProgram = {
     title: "4일차 · 전신 유산소",
     description: "전신을 움직여 심박수를 높이고 에너지를 태웁니다.",
     exercises: [
-        { id: "d4-1", name: "점핑 잭", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "jumping jacks cardio exercise", met: 8.0 },
+        { id: "d4-1", name: "점핑 잭", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "jumping jacks cardio exercise", met: 8.0, poseGuideUrl: jumpingImg },
         rest(1),
         { id: "d4-2", name: "하이 니 (무릎 높이기)", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "high knees running in place exercise", met: 9.0 },
         rest(2),
@@ -198,13 +208,13 @@ const DAY_11_WORKOUT: WorkoutProgram = {
     title: "11일차 · 전신 근력 강화",
     description: "전신 모든 근육을 동원하는 복합 웨이트 동작입니다.",
     exercises: [
-        { id: "d11-1", name: "스쿼트", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "bodyweight squat exercise legs", met: 5.0 },
+        { id: "d11-1", name: "스쿼트", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "bodyweight squat exercise legs", met: 5.0, poseGuideUrl: squatImg },
         rest(1),
-        { id: "d11-2", name: "푸쉬업", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "push up exercise chest strength", met: 6.5 },
+        { id: "d11-2", name: "푸쉬업", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "push up exercise chest strength", met: 6.5, poseGuideUrl: pushupImg },
         rest(2),
         { id: "d11-3", name: "슈퍼맨 홀드", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "superman back extension exercise", met: 3.5 },
         rest(3),
-        { id: "d11-4", name: "플랭크 버티기", duration: 40, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "plank core exercise stability", met: 3.5 },
+        { id: "d11-4", name: "플랭크 버티기", duration: 40, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "plank core exercise stability", met: 3.5, poseGuideUrl: plankImg },
     ]
 };
 
@@ -262,11 +272,11 @@ const DAY_15_WORKOUT: WorkoutProgram = {
     title: "15일차 · 전신 HIIT",
     description: "최대 강도로 지방을 태우고 폭발적인 파워를 생성합니다.",
     exercises: [
-        { id: "d15-1", name: "버피 테스트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "burpees exercise HIIT full body", met: 10.0 },
+        { id: "d15-1", name: "버피 테스트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "burpees exercise HIIT full body", met: 10.0, poseGuideUrl: burpeeImg },
         restLong(1),
-        { id: "d15-2", name: "점프 스쿼트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "squat jump plyometric exercise power", met: 9.5 },
+        { id: "d15-2", name: "점프 스쿼트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "squat jump plyometric exercise power", met: 9.5, poseGuideUrl: squatImg },
         restLong(2),
-        { id: "d15-3", name: "마운틴 클라이머", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "mountain climber floor exercise ab", met: 9.0 },
+        { id: "d15-3", name: "마운틴 클라이머", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "mountain climber floor exercise ab", met: 9.0, poseGuideUrl: mountainImg },
         restLong(3),
         { id: "d15-4", name: "하이 니 스프린트", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "high knees sprint fast cardio HIIT", met: 10.0 },
     ]
@@ -277,11 +287,11 @@ const DAY_16_WORKOUT: WorkoutProgram = {
     title: "16일차 · 상체 파워",
     description: "최대 출력을 위한 폭발적인 상체 트레이닝입니다.",
     exercises: [
-        { id: "d16-1", name: "익스플로시브 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "explosive push up plyometric clap chest", met: 7.5 },
+        { id: "d16-1", name: "익스플로시브 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", videoQuery: "explosive push up plyometric clap chest", met: 7.5, poseGuideUrl: pushupImg },
         restLong(1),
-        { id: "d16-2", name: "와이드 푸쉬업", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "wide push up chest exercise", met: 6.5 },
+        { id: "d16-2", name: "와이드 푸쉬업", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", videoQuery: "wide push up chest exercise", met: 6.5, poseGuideUrl: pushupImg },
         restLong(2),
-        { id: "d16-3", name: "파이크 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "pike push up shoulder press exercise", met: 5.5 },
+        { id: "d16-3", name: "파이크 푸쉬업", duration: 30, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", videoQuery: "pike push up shoulder press exercise", met: 5.5, poseGuideUrl: pushupImg },
         restLong(3),
         { id: "d16-4", name: "삼두 딥스", duration: 35, videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", videoQuery: "tricep dips bench chair exercise arms", met: 5.0 },
     ]

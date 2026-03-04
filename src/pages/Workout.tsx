@@ -64,25 +64,24 @@ export default function Workout() {
     // Fetch media (video & image) when step changes
     useEffect(() => {
         const fetchMedia = async () => {
-            if (currentStep.videoQuery) {
-                setIsLoadingVideo(true);
+            // 1. 만약 데이터에 직접 지정된 로컬 자세 이미지가 있다면 그것을 우선 사용!
+            let imageUrl = currentStep.poseGuideUrl || null;
+            let videoUrl = currentStep.videoUrl;
 
-                // Fetch Image for Prep Phase (Parallel)
-                const [videoUrl, imageUrl] = await Promise.all([
+            // 2. 검색어가 있고 로컬 이미지가 없는 경우만 API 호출
+            if (currentStep.videoQuery) {
+                const [fetchedVideoUrl, fetchedImageUrl] = await Promise.all([
                     videoService.getVideoUrl(currentStep.videoQuery),
-                    videoService.getImageUrl(currentStep.videoQuery)
+                    !imageUrl ? videoService.getImageUrl(currentStep.videoQuery) : Promise.resolve(null)
                 ]);
 
-                if (videoUrl) setCurrentVideoUrl(videoUrl);
-                else setCurrentVideoUrl(currentStep.videoUrl);
-
-                setCurrentImageUrl(imageUrl);
-                setIsLoadingVideo(false);
-            } else {
-                setCurrentVideoUrl(currentStep.videoUrl);
-                setCurrentImageUrl(null);
-                setIsLoadingVideo(false);
+                if (fetchedVideoUrl) videoUrl = fetchedVideoUrl;
+                if (fetchedImageUrl && !imageUrl) imageUrl = fetchedImageUrl;
             }
+
+            setCurrentVideoUrl(videoUrl);
+            setCurrentImageUrl(imageUrl);
+            setIsLoadingVideo(false);
         };
 
         fetchMedia();
@@ -212,7 +211,7 @@ export default function Workout() {
                 {/* Optimized Media Container */}
                 <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
                     <motion.div
-                        className="w-full relative aspect-video bg-neutral-900 rounded-[2.5rem] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.9)] border border-slate-800/50 group"
+                        className="w-full relative aspect-video bg-neutral-900 rounded-[2.5rem] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.9)] border border-slate-800/50 group max-h-[50vh] min-h-[300px]"
                         onClick={isPlaying ? handlePause : handleStart}
                         layout
                     >
@@ -280,7 +279,7 @@ export default function Workout() {
                                                 key={prepTimeLeft}
                                                 initial={{ scale: 1.5, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
-                                                className="text-[10rem] md:text-[14rem] font-black text-white leading-none drop-shadow-[0_0_40px_rgba(13,185,242,0.6)] italic"
+                                                className="text-[clamp(6rem,20vw,12rem)] font-black text-white leading-none drop-shadow-[0_0_40px_rgba(13,185,242,0.6)] italic"
                                             >
                                                 {prepTimeLeft}
                                             </motion.span>
@@ -341,7 +340,7 @@ export default function Workout() {
                                         key={isPrepPhase ? prepTimeLeft : timeLeftInStep}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className={`text-9xl md:text-[12rem] leading-none font-black font-mono tracking-tighter italic ${currentStep.isRest || isPrepPhase ? 'text-orange-500 bg-gradient-to-b from-yellow-400 to-orange-600' : 'text-primary-500 bg-gradient-to-b from-primary-400 to-primary-700'} bg-clip-text text-transparent`}
+                                        className={`text-[clamp(6rem,18vw,14rem)] leading-none font-black font-mono tracking-tighter italic ${currentStep.isRest || isPrepPhase ? 'text-orange-500 bg-gradient-to-b from-yellow-400 to-orange-600' : 'text-primary-500 bg-gradient-to-b from-primary-400 to-primary-700'} bg-clip-text text-transparent`}
                                     >
                                         {(isPrepPhase ? prepTimeLeft : timeLeftInStep).toString().padStart(2, '0')}
                                     </motion.span>
