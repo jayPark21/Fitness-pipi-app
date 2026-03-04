@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import Intro from './pages/Intro';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Workout from './pages/Workout';
@@ -39,11 +40,12 @@ function App() {
   return (
     <PayPalScriptProvider options={initialOptions}>
       <Router>
-        <div className="w-full min-h-screen bg-slate-900 text-slate-100 flex justify-center">
+        <div className="w-full min-h-screen bg-slate-900 text-slate-100 flex justify-center font-sans">
           <div className="w-full max-w-full md:max-w-4xl lg:max-w-6xl bg-slate-800 shadow-xl overflow-y-auto relative h-screen md:h-auto md:min-h-[80vh] md:my-8 md:rounded-3xl md:border md:border-slate-700">
 
             <Routes>
-              <Route path="/" element={<Onboarding />} />
+              <Route path="/" element={<Intro />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
               <Route path="/workout" element={<Workout />} />
               <Route path="/subscription" element={<Subscription />} />
