@@ -17,7 +17,7 @@ export default function Workout() {
 
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
     const [timeLeftInStep, setTimeLeftInStep] = useState(program.exercises[0].duration);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(true);
     const [isFinished, setIsFinished] = useState(false);
     const [isLoadingVideo, setIsLoadingVideo] = useState(true);
     const [currentVideoUrl, setCurrentVideoUrl] = useState(program.exercises[0].videoUrl);
@@ -82,6 +82,11 @@ export default function Workout() {
             setCurrentVideoUrl(videoUrl);
             setCurrentImageUrl(imageUrl);
             setIsLoadingVideo(false);
+
+            // 비디오 로딩 완료 후 자동 재생 시도
+            if (videoRef.current) {
+                videoRef.current.play().catch(e => console.error("Auto-play on load error:", e));
+            }
         };
 
         fetchMedia();
@@ -231,7 +236,7 @@ export default function Workout() {
                                     loop
                                     muted
                                     playsInline
-                                    autoPlay={isPlaying && !isPrepPhase}
+                                    autoPlay
                                 />
 
                                 {/* Prep Phase Overlay with Pose Image */}
